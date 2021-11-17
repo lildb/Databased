@@ -64,4 +64,9 @@ CREATE TABLE IF NOT EXISTS photos (
 /*  Execute this file from the command line by typing:
  *    mysql -u root < server/schema.sql
  *  to create the database and the tables.
+
+
+  head -7 answers_photos.csv
+
+
  */
