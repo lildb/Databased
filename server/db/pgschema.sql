@@ -77,26 +77,26 @@ SET TIME ZONE 'UTC';
 
 
 
-CREATE TABLE IF NOT EXISTS reviews.trait_reviews (
-  id INT PRIMARY KEY NOT NULL,
-  -- characteristic_id INT NOT NULL REFERENCES reviews.list(product_id),
-  characteristic_id INT NOT NULL,
-  review_id INT NOT NULL REFERENCES reviews.list(id),
-  value SMALLINT
-);
+-- CREATE TABLE IF NOT EXISTS reviews.trait_reviews (
+--   id INT PRIMARY KEY NOT NULL,
+--   -- characteristic_id INT NOT NULL REFERENCES reviews.list(product_id),
+--   characteristic_id INT NOT NULL,
+--   review_id INT NOT NULL REFERENCES reviews.list(id),
+--   value SMALLINT
+-- );
 
 
-CREATE TEMP TABLE importtraitsreviews (
-  id INT,
-  characteristic_id INT,
-  review_id INT,
-  value INT
-);
+-- CREATE TEMP TABLE importtraitsreviews (
+--   id INT,
+--   characteristic_id INT,
+--   review_id INT,
+--   value INT
+-- );
 
 
-\copy importtraitsreviews from './csv/characteristic_reviews.csv' delimiter ',' quote '"'csv header;
+-- \copy importtraitsreviews from './csv/characteristic_reviews.csv' delimiter ',' quote '"'csv header;
 
-INSERT INTO reviews.trait_reviews SELECT id, characteristic_id, review_id, value FROM importtraitsreviews;
+-- INSERT INTO reviews.trait_reviews SELECT id, characteristic_id, review_id, value FROM importtraitsreviews;
 
 
 
