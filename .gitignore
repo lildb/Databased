@@ -53,6 +53,8 @@ typings/
 # Optional eslint cache
 .eslintcache
 
+*.csv
+
 # Microbundle cache
 .rpt2_cache/
 .rts2_cache_cjs/
@@ -69,7 +71,7 @@ typings/
 .yarn-integrity
 
 # dotenv environment variables file
-config.env
+process.env
 .env.test
 
 # parcel-bundler cache (https://parceljs.org/)
@@ -102,3 +104,5 @@ dist
 
 # TernJS port file
 .tern-port
+
+coverage/
