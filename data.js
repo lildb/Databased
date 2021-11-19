@@ -4,7 +4,7 @@ var getReviews = ={
   "count": 5,
   "results": [
       {
-        //   "review_id": 1055620,
+          "review_id": 1055620,
           "rating": 2,
           "summary": "Quisquam quo amet consequuntur consequatur.",
           "recommend": true,

@@ -57,7 +57,13 @@ const getRatingsCountsByProductId = async (id) => {
 }
 
 
-const getAverageReviewByProductId = (id) => `SELECT avg(rating) FROM reviews.list WHERE (product_id=${id})`;
+const getAverageReviewByProductId = (id) => `SELECT avg(rating) FROM reviews.list WHERE (product_id=${id});`;
+
+const getReviewsByProductId = (id, options) => {
+  return `SELECT * FROM reviews.list
+    WHERE (product_id=${id} AND reported=false);`
+  // if options, sort by helpfulness
+};
 
 
 

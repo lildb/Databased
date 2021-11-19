@@ -11,6 +11,21 @@ reviews.get('/', (req, res) => {
 });
 
 
+reviews.put('/:review_id/report', (req, res) => {
+  res.status(204).send();
+});
+
+reviews.put('/:review_id/helpful', (req, res) => {
+  res.status(204).send();
+});
+
+
+
+
+
+
+
+
 /*
 
 https://www.npmjs.com/package/express-session

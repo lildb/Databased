@@ -4,24 +4,27 @@ CREATE DATABASE reviews;
 
 \c reviews;
 
-CREATE SCHEMA IF NOT EXISTS reviews AUTHORIZATION ciele;
-
 SET TIME ZONE 'UTC';
 
--- CREATE TABLE reviews.list (
---   id INT PRIMARY KEY NOT NULL,
---   product_id INT NOT NULL,
---   rating SMALLINT NOT NULL,
---   date TIMESTAMPTZ,
---   summary VARCHAR NOT NULL,
---   body VARCHAR,
---   recommend BOOLEAN,
---   reported BOOLEAN,
---   reviewer_name VARCHAR(30) NOT NULL,
---   reviewer_email VARCHAR(40),
---   response VARCHAR,
---   helpfulness SMALLINT
--- );
+CREATE SCHEMA IF NOT EXISTS reviews AUTHORIZATION ciele;
+
+CREATE TABLE reviews.products (
+  id INT PRIMARY KEY NOT NULL,
+  1_star SMALLINT,
+  2_star SMALLINT,
+  3_star SMALLINT,
+  4_star SMALLINT,
+  5_star SMALLINT,
+  recommended_t SMALLINT,
+  recommended_f SMALLINT,
+  quality SMALLINT,
+  size SMALLINT,
+  width SMALLINT,
+  fit SMALLINT,
+  len SMALLINT,
+  comfort SMALLINT
+);
+
 
 -- CREATE TEMP TABLE importreviews (
 --   id INT,
@@ -40,6 +43,27 @@ SET TIME ZONE 'UTC';
 
 
 -- \copy importreviews from './csv/reviews.csv' delimiter ',' csv header;
+
+INSERT INTO reviews.products (id)
+SELECT DISTINCT product_id
+FROM importreviews
+ORDER BY product_id;
+
+
+-- CREATE TABLE reviews.list (
+--   id INT PRIMARY KEY NOT NULL,
+--   product_id INT REFERENCES reviews.products,
+--   rating SMALLINT NOT NULL,
+--   date TIMESTAMPTZ,
+--   summary VARCHAR NOT NULL,
+--   body VARCHAR,
+--   recommend BOOLEAN,
+--   reported BOOLEAN,
+--   reviewer_name VARCHAR(30) NOT NULL,
+--   reviewer_email VARCHAR(40),
+--   response VARCHAR,
+--   helpfulness SMALLINT
+-- );
 
 -- INSERT INTO reviews.list (id, product_id, rating, date, summary, body, recommend, reported, reviewer_name, reviewer_email, response, helpfulness)
 -- SELECT id, product_id, rating, to_timestamp(date / 1000), summary, body, recommend, reported, reviewer_name, reviewer_email, response, helpfulness
