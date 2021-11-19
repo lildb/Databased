@@ -1,7 +1,6 @@
 const express = require('express');
-const session = require('express-session');
 const bodyParser = require('body-parser');
-const reviews = require('./routes/reviews.js')
+const reviews = require('./reviews.js')
 
 const app = express();
 const PORT = 3000;

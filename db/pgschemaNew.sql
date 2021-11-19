@@ -32,7 +32,7 @@ CREATE TABLE reviews.products (
 --   rating SMALLINT,
 --   date BIGINT,
 --   summary VARCHAR NOT NULL,
---   body VARCHAR,
+--   body VARCHAR(400),
 --   recommend BOOLEAN,
 --   reported BOOLEAN,
 --   reviewer_name VARCHAR NOT NULL,
@@ -55,24 +55,24 @@ ORDER BY product_id;
 --   product_id INT REFERENCES reviews.products,
 --   rating SMALLINT NOT NULL,
 --   date TIMESTAMPTZ,
---   summary VARCHAR NOT NULL,
---   body VARCHAR,
+--   summary VARCHAR(120) NOT NULL,
+--   body VARCHAR(460),
 --   recommend BOOLEAN,
 --   reported BOOLEAN,
 --   reviewer_name VARCHAR(30) NOT NULL,
 --   reviewer_email VARCHAR(40),
---   response VARCHAR,
+--   response VARCHAR(110),
 --   helpfulness SMALLINT
 -- );
 
 -- INSERT INTO reviews.list (id, product_id, rating, date, summary, body, recommend, reported, reviewer_name, reviewer_email, response, helpfulness)
--- SELECT id, product_id, rating, to_timestamp(date / 1000), summary, body, recommend, reported, reviewer_name, reviewer_email, response, helpfulness
+-- SELECT id, product_id, rating, to_timestamp(date / 1000, AT TIME ZONE 'UTC'), summary, body, recommend, reported, reviewer_name, reviewer_email, response, helpfulness
 -- FROM importreviews;
 
 
 -- CREATE TABLE IF NOT EXISTS reviews.photos (
 --   id INT NOT NULL,
---   review_id INT NOT NULL,
+--   review_id BIGINT NOT NULL,
 --   url VARCHAR(160),
 --   FOREIGN KEY(review_id) REFERENCES reviews.list(id)
 -- );

@@ -1,15 +1,12 @@
 const express = require('express');
 const reviews = express.Router();
+const db = require('../db/index.js')
 
-reviews.use('*', (req, res, next) => {
-  res.send('Reviews Router');
-  next();
-})
 
-reviews.get('/', (req, res) => {
-  res.send('Reviews API');
-});
 
+
+reviews.get('/', db.getReviewsByProductId);
+//curl http://localhost:3000/reviews/?product_id=61588
 
 reviews.put('/:review_id/report', (req, res) => {
   res.status(204).send();
@@ -20,6 +17,7 @@ reviews.put('/:review_id/helpful', (req, res) => {
 });
 
 
+reviews.get('/benchmark', db.benchmark);
 
 
 

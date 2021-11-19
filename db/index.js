@@ -1,74 +1,68 @@
 require('dotenv').config();
 
 const { Client, Pool } = require('pg');
-const fs = require('fs');
-
-let startTime = Date.now()
 
 const config = {
+  // database: process.env.PGDATABASE, // not working
   host: process.env.PGHOST,
   port: process.env.PGPORT,
   password: process.env.PGPASSWORD,
-  database: 'reviews'
-  // database: process.env.PGDATABASE
+  database: 'reviews',
+  max:20
 };
 
-const pool = new Pool(config)
+const pool = new Pool(config);
 
-// pool.connect((err, client, done) => {
-//   if (err) throw err;
-
-//   try {
-
-//   } finally {
-//     done();
-//   }
-// })
+pool.connect();
 
 
-// you can also use async/await
+const benchmark = (req, res) => {
 
-const client = new Client(config);
-client.connect();
+  pool.query('SELECT 1+1 AS sum', (error, results) => {
+    if (error) {
+      return res.status(400).send(error);
+    }
+    res.status(200).send(results.rows?.[0]);
+  })
 
-const getAverageRatingByProductId = (id) => `SELECT avg(rating) FROM reviews.list WHERE (product_id=${id});`;
-
-
-
-
-
-
-
-
-
-const getRatingsCountsByProductId = async (id) => {
-  var one = await `SELECT count(rating) FROM reviews.list WHERE (product_id=${id} AND rating=1);`;
-  var two = await `SELECT count(rating) FROM reviews.list WHERE (product_id=${id} AND rating=2);`;
-  var three = await `SELECT count(rating) FROM reviews.list WHERE (product_id=${id} AND rating=3);`;
-  var four = await `SELECT count(rating) FROM reviews.list WHERE (product_id=${id} AND rating=4);`;
-  var five = await `SELECT count(rating) FROM reviews.list WHERE (product_id=${id} AND rating=5);`;
-  return {
-    one,
-    two,
-    three,
-    four,
-    five
-  }
 }
 
 
-const getAverageReviewByProductId = (id) => `SELECT avg(rating) FROM reviews.list WHERE (product_id=${id});`;
+const getAverageRatingByProductId = (req, res) => {
+  let {product_id} = req.query;
 
-const getReviewsByProductId = (id, options) => {
-  return `SELECT * FROM reviews.list
-    WHERE (product_id=${id} AND reported=false);`
-  // if options, sort by helpfulness
+  pool.query(`SELECT avg(rating)
+  FROM reviews.list
+  WHERE (product_id=${product_id});`, (error, results) => {
+    if (error) {
+      return res.status(400).send(error);
+    }
+    res.status(200).send(results.rows?.[0]);
+  })
+
+}
+
+
+const getReviewsByProductId = (req, res) => {
+  let {product_id, sort, page, count} = req.query;
+  let limit = 5;
+  let query = `SELECT * FROM reviews.list
+    WHERE (product_id=${product_id} AND reported=false) `
+  if (count) {
+    limit = limit || count;
+    // sort? // 'helpful', 'newest', 'relevant'
+    // page? // OFFSET (limit * page)
+  }
+  query += ` LIMIT ${limit};`;
+  pool.query(query, (error, results) => {
+    if (error) {
+      return res.status(400).send(error)
+    } res.status(200).send(results?.rows);
+  })
 };
 
-
-
-client.query(getRatingsCountsByProductId(61529), (err, res) => {
-  console.log(err, res?.rows || res);
-  console.log((Date.now() - startTime) / 1000);
-  client.end()
-});
+module.exports = {
+  getAverageRatingByProductId,
+  getReviewsByProductId,
+  benchmark
+}
