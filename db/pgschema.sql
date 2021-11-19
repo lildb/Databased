@@ -99,8 +99,13 @@ SET TIME ZONE 'UTC';
 -- INSERT INTO reviews.trait_reviews SELECT id, characteristic_id, review_id, value FROM importtraitsreviews;
 
 
+CREATE TABLE IF NOT EXISTS reviews.meta (
+  id INT PRIMARY KEY NOT NULL,
+  rating real
+);
 
-
+INSERT INTO reviews.meta (product_id) SELECT DISTINCT product_id from reviews.list ORDER BY product_id;
+-- INSERT INTO reviews.meta (rating) SELECT avg(rating) from reviews.list WHERE (product_id=(SELECT product_id from reviews.meta));
 
 
 
