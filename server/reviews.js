@@ -9,11 +9,14 @@ reviews.put('/:review_id/report', db.reportReview);
 
 reviews.put('/:review_id/helpful', db.markAsHelpful);
 
-reviews.post('/', () => {}); //handle new review post
+reviews.post('/', (req, res) => {
+  console.log(req.body)
+  res.send(req.body.product_id)
+}); //handle new review post
 
 reviews.get('/benchmark', db.benchmark);
 
 // reviews.get('/meta', db.getAverageRatingByProductId);
 
 
-module.exports = reviews;
+module.exports = reviews

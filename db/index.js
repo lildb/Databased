@@ -1,13 +1,12 @@
 require('dotenv').config();
 
-const { Client, Pool } = require('pg');
+const { Pool } = require('pg');
 
 const config = {
-  database: process.env.PGDATABASE, // not working
+  database: process.env.PGDATABASE,
   host: process.env.PGHOST,
   port: process.env.PGPORT,
   password: process.env.PGPASSWORD,
-  // database: 'reviews',
   max: 20,
   rowMode: 'array'
 };
@@ -18,26 +17,36 @@ pool.connect();
 
 
 const benchmark = (req, res) => {
-  pool.query('SELECT 1+1', (error, results) => {
+  let query = 'SELECT \'Hello World\''
+  pool.query(query, (error, results) => {
     if (error) {
       return res.status(400).send(error.stack);
-    } res.status(200).send(results.rows?.[0]);
+    } res.status(200).send(results.rows);
   })
 
 }
 
 const getReviewsByProductId = (req, res) => {
-  let {product_id, sort, page, count} = req.query;
-  count = count || 5;
-  page = page || 0;
+  let {product_id, sort, page = 0, count = 5} = req.query;
   let queryResult = {
     product: product_id,
     count,
     page
   };
 
-  let query = `SELECT * FROM reviews.list
-    WHERE (product_id=${product_id} AND reported=false) `;
+  let query = `SELECT id AS review_id,
+    rating,
+    summary,
+    recommend,
+    response,
+    body,
+    date,
+    reviewer_name,
+    reviewer_email,
+    helpfulness
+    FROM reviews.list
+    WHERE (product_id=${product_id} AND
+    reported=false)`;
 
   if (sort) {
     switch (sort) {
@@ -55,6 +64,7 @@ const getReviewsByProductId = (req, res) => {
   }
   query += ` OFFSET ${parseInt(page * count)}`;
   query += ` LIMIT ${count};`;
+  console.log(query)
 
   pool.query(query, (error, results) => {
     if (error) {
