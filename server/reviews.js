@@ -1,6 +1,6 @@
 const express = require('express');
 const reviews = express.Router();
-const db = require('../db/index.js')
+const db = require('../db/')
 
 
 reviews.get('/', db.getReviewsByProductId);

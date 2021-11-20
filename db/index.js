@@ -3,11 +3,11 @@ require('dotenv').config();
 const { Client, Pool } = require('pg');
 
 const config = {
-  // database: process.env.PGDATABASE, // not working
+  database: process.env.PGDATABASE, // not working
   host: process.env.PGHOST,
   port: process.env.PGPORT,
   password: process.env.PGPASSWORD,
-  database: 'reviews',
+  // database: 'reviews',
   max: 20,
   rowMode: 'array'
 };

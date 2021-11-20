@@ -1,6 +1,5 @@
 const express = require('express');
-const bodyParser = require('body-parser');
-const reviews = require('./reviews.js')
+const reviews = require('./reviews')
 
 const app = express();
 const PORT = 3000;
@@ -12,7 +11,7 @@ app.listen(PORT, (req, res) => {
 });
 
 app.use(express.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.urlencoded({extended: true}))
 app.use('/reviews', reviews);
 
 
