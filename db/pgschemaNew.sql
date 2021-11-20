@@ -9,20 +9,20 @@ SET TIME ZONE 'UTC';
 CREATE SCHEMA IF NOT EXISTS reviews AUTHORIZATION ciele;
 
 CREATE TABLE reviews.products (
-  id INT PRIMARY KEY NOT NULL,
-  1_star SMALLINT,
-  2_star SMALLINT,
-  3_star SMALLINT,
-  4_star SMALLINT,
-  5_star SMALLINT,
-  recommended_t SMALLINT,
-  recommended_f SMALLINT,
-  quality SMALLINT,
-  size SMALLINT,
-  width SMALLINT,
-  fit SMALLINT,
-  len SMALLINT,
-  comfort SMALLINT
+  id INT PRIMARY KEY NOT NULL
+  -- _1 SMALLINT,
+  -- _2 SMALLINT,
+  -- _3 SMALLINT,
+  -- _4 SMALLINT,
+  -- _5 SMALLINT,
+  -- recommended_t SMALLINT,
+  -- recommended_f SMALLINT,
+  -- quality SMALLINT,
+  -- size SMALLINT,
+  -- width SMALLINT,
+  -- fit SMALLINT,
+  -- len SMALLINT,
+  -- comfort SMALLINT
 );
 
 
@@ -32,7 +32,7 @@ CREATE TABLE reviews.products (
 --   rating SMALLINT,
 --   date BIGINT,
 --   summary VARCHAR NOT NULL,
---   body VARCHAR(400),
+--   body VARCHAR,
 --   recommend BOOLEAN,
 --   reported BOOLEAN,
 --   reviewer_name VARCHAR NOT NULL,
@@ -44,17 +44,18 @@ CREATE TABLE reviews.products (
 
 -- \copy importreviews from './csv/reviews.csv' delimiter ',' csv header;
 
-INSERT INTO reviews.products (id)
-SELECT DISTINCT product_id
-FROM importreviews
-ORDER BY product_id;
+-- INSERT INTO reviews.products (id)
+-- SELECT DISTINCT product_id
+-- FROM importreviews
+-- ORDER BY product_id;
 
 
 -- CREATE TABLE reviews.list (
 --   id INT PRIMARY KEY NOT NULL,
 --   product_id INT REFERENCES reviews.products,
---   rating SMALLINT NOT NULL,
---   date TIMESTAMPTZ,
+--   rating SMALLINT NOT NULL
+--   CHECK (rating > 0 AND rating < 6),
+--   date BIGINT,
 --   summary VARCHAR(120) NOT NULL,
 --   body VARCHAR(460),
 --   recommend BOOLEAN,
@@ -72,13 +73,22 @@ ORDER BY product_id;
 
 -- CREATE TABLE IF NOT EXISTS reviews.photos (
 --   id INT NOT NULL,
---   review_id BIGINT NOT NULL,
 --   url VARCHAR(160),
---   FOREIGN KEY(review_id) REFERENCES reviews.list(id)
+--   FOREIGN KEY(review_id) REFERENCES reviews.list(id),
+--   FOREIGN KEY(product_id) REFERENCES reviews.products(id)
 -- );
 
--- \copy reviews.photos from './csv/reviews_photos.csv' delimiter ',' csv header;
 
+CREATE TEMP TABLE photos (
+  id INT NOT NULL,
+  url TEXT,
+  review_id BIGINT NOT NULL
+);
+
+
+-- \copy photos from './csv/reviews_photos.csv' delimiter ',' csv header;
+
+INSERT INTO reviews.photos (id, url)
 
 
 -- CREATE TABLE IF NOT EXISTS reviews.traits (
@@ -123,12 +133,12 @@ ORDER BY product_id;
 -- INSERT INTO reviews.trait_reviews SELECT id, characteristic_id, review_id, value FROM importtraitsreviews;
 
 
-CREATE TABLE IF NOT EXISTS reviews.meta (
-  id INT PRIMARY KEY NOT NULL,
-  rating real
-);
+-- CREATE TABLE IF NOT EXISTS reviews.meta (
+--   id INT PRIMARY KEY NOT NULL,
+--   rating real
+-- );
 
-INSERT INTO reviews.meta (product_id) SELECT DISTINCT product_id from reviews.list ORDER BY product_id;
+-- INSERT INTO reviews.meta (product_id) SELECT DISTINCT product_id from reviews.list ORDER BY product_id;
 -- INSERT INTO reviews.meta (rating) SELECT avg(rating) from reviews.list WHERE (product_id=(SELECT product_id from reviews.meta));
 
 
@@ -137,7 +147,7 @@ INSERT INTO reviews.meta (product_id) SELECT DISTINCT product_id from reviews.li
 /*  Execute this file from the command line by typing:
 
 
-psql -U ciele postgres -f ./server/db/schema.sql
+psql -U ciele postgres -f ./db/pgschemaNew.sql
 
   *  to create the database, schema, and the tables.
   *  note: opens to database 'postgres' then \c to database 'reviews'

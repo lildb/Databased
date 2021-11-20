@@ -3,31 +3,17 @@ const reviews = express.Router();
 const db = require('../db/index.js')
 
 
-
-
 reviews.get('/', db.getReviewsByProductId);
-//curl http://localhost:3000/reviews/?product_id=61588
 
-reviews.put('/:review_id/report', (req, res) => {
-  res.status(204).send();
-});
+reviews.put('/:review_id/report', db.reportReview);
 
-reviews.put('/:review_id/helpful', (req, res) => {
-  res.status(204).send();
-});
+reviews.put('/:review_id/helpful', db.markAsHelpful);
 
+reviews.post('/', () => {}); //handle new review post
 
 reviews.get('/benchmark', db.benchmark);
 
+// reviews.get('/meta', db.getAverageRatingByProductId);
 
-
-
-
-
-/*
-
-https://www.npmjs.com/package/express-session
-
-*/
 
 module.exports = reviews;

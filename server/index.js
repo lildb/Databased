@@ -11,10 +11,9 @@ app.listen(PORT, (req, res) => {
   http://localhost:${PORT}`);
 });
 
-
 app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use('/reviews', reviews)
+app.use('/reviews', reviews);
 
 
 app.get('/', (req, res) => {
