@@ -22,13 +22,8 @@ CREATE TABLE test (
 
 /*
 
-Execute this file from the command line:
+Execute this file:
 
   psql -U ciele postgres -f ./tests/pgtest.sql
 
-
-View first -n rows of csv file:
-
-  head -7 answers_photos.csv
-
- */
+*/

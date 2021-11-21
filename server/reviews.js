@@ -13,6 +13,7 @@ reviews.post('/', (req, res) => {
   console.log(req.body)
   res.status(201).send()
 }); //handle new review post
+// update client side to use req.body instead of req.params
 
 reviews.get('/benchmark', db.benchmark);
 
