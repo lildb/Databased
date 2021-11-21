@@ -4,8 +4,8 @@
   "description": "Hack Reactor System Design Capstone - Atelier Reviews API",
   "main": "./server/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "source .env; nodemon ./server/index.js"
+    "start": "source .env; nodemon ./server/index.js",
+    "test": "jest --no-cache"
   },
   "repository": {
     "type": "git",
@@ -27,5 +27,8 @@
     "newrelic": "^8.6.0",
     "nodemon": "^2.0.15",
     "pg": "^8.7.1"
+  },
+  "devDependencies": {
+    "jest": "^27.3.1"
   }
 }

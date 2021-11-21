@@ -11,7 +11,7 @@ reviews.put('/:review_id/helpful', db.markAsHelpful);
 
 reviews.post('/', (req, res) => {
   console.log(req.body)
-  res.send(req.body.product_id)
+  res.status(201).send()
 }); //handle new review post
 
 reviews.get('/benchmark', db.benchmark);
@@ -19,4 +19,4 @@ reviews.get('/benchmark', db.benchmark);
 // reviews.get('/meta', db.getAverageRatingByProductId);
 
 
-module.exports = reviews
+module.exports = reviews;

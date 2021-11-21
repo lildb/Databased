@@ -1,5 +1,5 @@
 const express = require('express');
-const reviews = require('./reviews')
+const reviews = require('./reviews');
 
 const app = express();
 const PORT = 3000;
