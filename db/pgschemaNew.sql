@@ -9,13 +9,16 @@ SET TIME ZONE 'UTC';
 CREATE SCHEMA IF NOT EXISTS reviews AUTHORIZATION ciele;
 
 CREATE TABLE reviews.products (
-  id INT PRIMARY KEY NOT NULL
+  id INT PRIMARY KEY NOT NULL,
+  ratings OBJECT,
+  reviews BIGINT[],
+  characteristics TEXT, -- fix this
   -- _1 SMALLINT,
   -- _2 SMALLINT,
   -- _3 SMALLINT,
   -- _4 SMALLINT,
   -- _5 SMALLINT,
-  -- recommended_t SMALLINT,
+  recommended SMALLINT, --key value, store averages
   -- recommended_f SMALLINT,
   -- quality SMALLINT,
   -- size SMALLINT,
@@ -53,7 +56,7 @@ CREATE TABLE reviews.products (
 -- CREATE TABLE reviews.list (
 --   id INT PRIMARY KEY NOT NULL,
 --   product_id INT REFERENCES reviews.products,
---   rating SMALLINT NOT NULL
+--   rating SMALLINT NOT NULL,
 --   CHECK (rating > 0 AND rating < 6),
 --   date BIGINT,
 --   summary VARCHAR(120) NOT NULL,
