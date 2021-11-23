@@ -1,5 +1,4 @@
 require('dotenv').config();
-
 const { Pool } = require('pg');
 
 const config = {
@@ -8,30 +7,29 @@ const config = {
   port: process.env.PGPORT,
   password: process.env.PGPASSWORD,
   max: 20,
-  rowMode: 'array'
+  rowMode: 'array',
 };
 
 const pool = new Pool(config);
 
 pool.connect();
 
-
 const benchmark = (req, res) => {
-  let query = 'SELECT \'Hello World\''
+  let query = "SELECT 'Hello World';";
   pool.query(query, (error, results) => {
     if (error) {
       return res.status(400).send(error.stack);
-    } res.status(200).send(results.rows);
-  })
-
-}
+    }
+    res.status(200).send(results?.rows);
+  });
+};
 
 const getReviewsByProductId = (req, res) => {
-  let {product_id, sort, page = 0, count = 5} = req.query;
+  let { product_id, sort, page = 0, count = 5 } = req.query;
   let queryResult = {
     product: product_id,
     count,
-    page
+    page,
   };
 
   let query = `SELECT id AS review_id,
@@ -45,7 +43,7 @@ const getReviewsByProductId = (req, res) => {
     reviewer_email,
     helpfulness
     FROM reviews.list
-    WHERE (product_id=${product_id} AND
+    WHERE (product_id=${product_id || 1} AND
     reported=false)`;
 
   if (sort) {
@@ -64,16 +62,30 @@ const getReviewsByProductId = (req, res) => {
   }
   query += ` OFFSET ${parseInt(page * count)}`;
   query += ` LIMIT ${count};`;
-  console.log(query)
+  console.log(query);
 
   pool.query(query, (error, results) => {
     if (error) {
-      return res.status(400).send(error.stack)
-    } queryResult.results = results?.rows
+      return res.status(400).send(error.stack);
+    }
+    queryResult.results = results?.rows;
     res.status(200).send(queryResult);
-  })
+  });
 };
 
+const queryReviewsByProductId = (req, res) => {
+  let { product_id, sort, page = 0, count = 5 } = req.query;
+  if (!product_id) {
+    return res.status(400).send('Invalid product_id');
+  }
+  let query = `SELECT * from reviews.list
+    INNER JOIN reviews.reviews_products ON
+    (reviews.list.id=reviews.reviews_products.review_id)
+    WHERE (reviews.reviews_products.product_id=${product_id})
+    AND (reviews.list.reported=false);` //much faster - update above function
+
+
+}
 
 const getAverageRatingByProductId = (req, res) => {
   let { product_id } = req.query;
@@ -84,15 +96,58 @@ const getAverageRatingByProductId = (req, res) => {
 
   let query = `SELECT avg(rating)
   FROM reviews.list
-  WHERE (product_id=${id});`
+  WHERE (product_id=${id});`;
 
   pool.query(query, (error, results) => {
     if (error) {
       return res.status(400).send(error);
-    } res.status(200).send(results.rows);
+    }
+    res.status(200).send(results.rows);
   });
 };
 
+const postNewReview = (req, res) => {
+  let {
+    product_id,
+    reviewer_name,
+    reviewer_email,
+    date: date,
+    rating,
+    summary,
+    body,
+    helpfulness,
+    response,
+    recommend,
+    photos,
+    characteristics
+  } = req.body;
+
+  let query = {
+    text: `INSERT INTO reviews.list (
+      )
+      VALUES ($1,
+      $2,
+      $3,
+      $4,
+      $5,
+      $6,
+      $7
+    )`,
+    values: [
+
+    ]
+  }
+}
+
+
+/* selecting photos:
+
+select photos.id, url from reviews.photos
+    INNER JOIN reviews.reviews_products ON
+    (reviews.photos.review_id=reviews.reviews_products.review_id)
+    WHERE (reviews.reviews_products.product_id=654);
+
+    */
 
 const markAsHelpful = (req, res) => {
   let { review_id } = req.query;
@@ -107,10 +162,10 @@ const markAsHelpful = (req, res) => {
   pool.query(query, (error, results) => {
     if (error) {
       return res.status(400).send(error.stack);
-    } res.status(204).send();
+    }
+    res.status(204).send(results?.rows);
   });
 };
-
 
 const reportReview = (req, res) => {
   let { review_id } = req.query;
@@ -125,15 +180,16 @@ const reportReview = (req, res) => {
   pool.query(query, (error, results) => {
     if (error) {
       return res.status(400).send(error.stack);
-    } res.status(204).send();
+    }
+    res.status(204).send(results.rows);
   });
 };
-
 
 module.exports = {
   benchmark,
   getAverageRatingByProductId,
   getReviewsByProductId,
+  markAsHelpful,
   reportReview,
-  markAsHelpful
-}
+  postNewReview
+};
