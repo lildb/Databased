@@ -11,7 +11,6 @@ const config = {
 };
 
 const pool = new Pool(config);
-
 pool.connect();
 
 const benchmark = (req, res) => {
@@ -25,9 +24,10 @@ const benchmark = (req, res) => {
 };
 
 const getReviewsByProductId = (req, res) => {
-  let { product_id, sort, page = 0, count = 5 } = req.query;
+  let { product_id, sort, page = 1, count = 5 } = req.query;
+
   let queryResult = {
-    product: product_id,
+    product: String(product_id),
     count,
     page,
   };
@@ -43,8 +43,10 @@ const getReviewsByProductId = (req, res) => {
     reviewer_email,
     helpfulness
     FROM reviews.list
-    WHERE (product_id=${product_id || 1} AND
-    reported=false)`;
+    INNER JOIN reviews.reviews_products ON
+    (reviews.list.id=reviews.reviews_products.review_id)
+    WHERE (reviews.reviews_products.product_id=${product_id || 1})
+    AND (reviews.list.reported=false) `;
 
   if (sort) {
     switch (sort) {
@@ -60,8 +62,10 @@ const getReviewsByProductId = (req, res) => {
         break;
     }
   }
-  query += ` OFFSET ${parseInt(page * count)}`;
+
+  query += ` OFFSET ${parseInt((page * count) - count)}`;
   query += ` LIMIT ${count};`;
+
   console.log(query);
 
   pool.query(query, (error, results) => {
@@ -70,39 +74,6 @@ const getReviewsByProductId = (req, res) => {
     }
     queryResult.results = results?.rows;
     res.status(200).send(queryResult);
-  });
-};
-
-const queryReviewsByProductId = (req, res) => {
-  let { product_id, sort, page = 0, count = 5 } = req.query;
-  if (!product_id) {
-    return res.status(400).send('Invalid product_id');
-  }
-  let query = `SELECT * from reviews.list
-    INNER JOIN reviews.reviews_products ON
-    (reviews.list.id=reviews.reviews_products.review_id)
-    WHERE (reviews.reviews_products.product_id=${product_id})
-    AND (reviews.list.reported=false);` //much faster - update above function
-
-
-}
-
-const getAverageRatingByProductId = (req, res) => {
-  let { product_id } = req.query;
-
-  if (!product_id) {
-    return res.status(400).send('Invalid product_id');
-  }
-
-  let query = `SELECT avg(rating)
-  FROM reviews.list
-  WHERE (product_id=${id});`;
-
-  pool.query(query, (error, results) => {
-    if (error) {
-      return res.status(400).send(error);
-    }
-    res.status(200).send(results.rows);
   });
 };
 
@@ -115,10 +86,10 @@ const postNewReview = (req, res) => {
     rating,
     summary,
     body,
-    helpfulness,
-    response,
-    recommend,
-    photos,
+    helpfulness, // default zero
+    response, //default null
+    recommend, //default true
+    photos, // how to handle
     characteristics
   } = req.body;
 
@@ -132,7 +103,7 @@ const postNewReview = (req, res) => {
       $5,
       $6,
       $7
-    )`,
+    ) `,
     values: [
 
     ]
@@ -140,12 +111,22 @@ const postNewReview = (req, res) => {
 }
 
 
-/* selecting photos:
+/* selecting WITH photos:
 
-select photos.id, url from reviews.photos
+select * from reviews.list
+    INNER JOIN reviews.reviews_products ON
+    (reviews.list.id=reviews.reviews_products.review_id)
+    INNER JOIN reviews.photos ON (reviews.reviews_products.review_id=reviews.photos.review_id) WHERE (reviews.reviews_products.product_id=61588) LIMIT 50;
+    //very slow, look into rows_to_json
+
+
+selecting photos by review id AS array of objects:
+
+select json_agg(json_build_object('id', reviews.photos.id, "url", url)) from reviews.photos
     INNER JOIN reviews.reviews_products ON
     (reviews.photos.review_id=reviews.reviews_products.review_id)
-    WHERE (reviews.reviews_products.product_id=654);
+    WHERE (reviews.reviews_products.product_id=61588) GROUP BY reviews.photos.review_id;
+
 
     */
 
@@ -187,7 +168,6 @@ const reportReview = (req, res) => {
 
 module.exports = {
   benchmark,
-  getAverageRatingByProductId,
   getReviewsByProductId,
   markAsHelpful,
   reportReview,
