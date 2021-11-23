@@ -73,6 +73,20 @@ const getReviewsByProductId = (req, res) => {
   });
 };
 
+const queryReviewsByProductId = (req, res) => {
+  let { product_id, sort, page = 0, count = 5 } = req.query;
+  if (!product_id) {
+    return res.status(400).send('Invalid product_id');
+  }
+  let query = `SELECT * from reviews.list
+    INNER JOIN reviews.reviews_products ON
+    (reviews.list.id=reviews.reviews_products.review_id)
+    WHERE (reviews.reviews_products.product_id=${product_id})
+    AND (reviews.list.reported=false);` //much faster - update above function
+
+
+}
+
 const getAverageRatingByProductId = (req, res) => {
   let { product_id } = req.query;
 
@@ -126,28 +140,14 @@ const postNewReview = (req, res) => {
 }
 
 
+/* selecting photos:
 
+select photos.id, url from reviews.photos
+    INNER JOIN reviews.reviews_products ON
+    (reviews.photos.review_id=reviews.reviews_products.review_id)
+    WHERE (reviews.reviews_products.product_id=654);
 
-
-/*
-
-  const data = {
-    product_id: current.id,
-    rating: Number(e.target.rating.value),
-    summary: e.target.summary.value,
-    body: e.target.body.value,
-    recommend: e.target.recommend.value === true,
-    name: e.target.name.value,
-    email: e.target.email.value,
-    characteristics,
-    photos: [],
-  };
-
-*/
-
-
-
-
+    */
 
 const markAsHelpful = (req, res) => {
   let { review_id } = req.query;
