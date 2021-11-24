@@ -32,7 +32,7 @@ const getReviewsByProductId = (req, res) => {
     page,
   };
 
-  let query = `SELECT id AS review_id,
+  let query = `SELECT reviews.list.id AS review_id,
     rating,
     summary,
     recommend,
@@ -45,6 +45,15 @@ const getReviewsByProductId = (req, res) => {
     FROM reviews.list
     INNER JOIN reviews.reviews_products ON
     (reviews.list.id=reviews.reviews_products.review_id)
+
+    LEFT OUTER JOIN reviews.photos ON
+    (reviews.reviews_products.review_id=reviews.photos.review_id)
+
+    LEFT JOIN reviews.reviews_products ON
+   (reviews.photos.review_id=reviews.reviews_products.review_id)
+   WHERE (reviews.reviews_products.product_id=61588) LIMIT 50;
+
+
     WHERE (reviews.reviews_products.product_id=${product_id || 1})
     AND (reviews.list.reported=false) `;
 
@@ -122,10 +131,13 @@ select * from reviews.list
 
 selecting photos by review id AS array of objects:
 
-select json_agg(json_build_object('id', reviews.photos.id, "url", url)) from reviews.photos
-    INNER JOIN reviews.reviews_products ON
-    (reviews.photos.review_id=reviews.reviews_products.review_id)
-    WHERE (reviews.reviews_products.product_id=61588) GROUP BY reviews.photos.review_id;
+SELECT COALESCE (
+  json_agg(json_build_object( 'id', reviews.photos.id, 'url', url) ) FILTER (WHERE url IS NOT NULL),
+  '[]' ) from reviews.photos
+  RIGHT JOIN reviews.reviews_products ON
+  (reviews.reviews_products.review_id=reviews.photos.review_id)
+  WHERE (reviews.reviews_products.product_id=61588)
+  GROUP BY reviews.reviews_products.review_id;
 
 
     */
@@ -133,34 +145,26 @@ select json_agg(json_build_object('id', reviews.photos.id, "url", url)) from rev
 const markAsHelpful = (req, res) => {
   let { review_id } = req.query;
 
-  if (!review_id) {
-    return res.status(400).send('Invalid review_id');
-  }
-
   let query = `UPDATE reviews.list
     SET helpfulness = helpfulness + 1
     WHERE (id=${review_id});`;
   pool.query(query, (error, results) => {
     if (error) {
-      return res.status(400).send(error.stack);
+      return res.status(400).send('Invalid review_id');
     }
-    res.status(204).send(results?.rows);
+    res.status(204).send(results.rows);
   });
 };
 
 const reportReview = (req, res) => {
   let { review_id } = req.query;
 
-  if (!review_id) {
-    return res.status(400).send('Invalid review_id');
-  }
-
   let query = `UPDATE reviews.list
     SET reported = true
     WHERE (id=${review_id});`;
   pool.query(query, (error, results) => {
     if (error) {
-      return res.status(400).send(error.stack);
+      return res.status(400).send('Invalid review_id');
     }
     res.status(204).send(results.rows);
   });

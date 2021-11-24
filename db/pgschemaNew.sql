@@ -4,8 +4,6 @@ CREATE DATABASE reviews;
 
 \c reviews;
 
-SET TIME ZONE 'UTC';
-
 CREATE SCHEMA IF NOT EXISTS reviews AUTHORIZATION ciele;
 
 CREATE TABLE reviews.products (
@@ -39,8 +37,8 @@ CREATE TEMP TABLE importreviews (
   date BIGINT,
   summary TEXT,
   body TEXT,
-  recommend BOOLEAN,
-  reported BOOLEAN,
+  recommend BOOLEAN DEFAULT TRUE,
+  reported BOOLEAN DEFAULT FALSE,
   reviewer_name TEXT,
   reviewer_email TEXT,
   response TEXT,
@@ -62,19 +60,20 @@ CREATE TABLE reviews.list (
   date TIMESTAMPTZ,
   summary VARCHAR(120) NOT NULL,
   body VARCHAR(480),
+  response VARCHAR(110),
   recommend BOOLEAN,
-  reported BOOLEAN,
   reviewer_name VARCHAR(30) NOT NULL,
   reviewer_email VARCHAR(40) NOT NULL,
-  response VARCHAR(110),
-  helpfulness SMALLINT DEFAULT 0,
+  helpfulness SMALLINT,
+  reported BOOLEAN,
   photos INT[]
 );
 
-INSERT INTO reviews.list (id, product_id, rating, date, summary, body, recommend, reported, reviewer_name, reviewer_email, response, helpfulness)
-SELECT id, product_id, rating, to_timestamp(date / 1000), summary, body, recommend, reported, reviewer_name, reviewer_email, response, helpfulness
+INSERT INTO reviews.list (id, product_id, rating, date, summary, body, response, recommend, reviewer_name, reviewer_email, helpfulness, reported)
+SELECT id, product_id, rating,
+date_trunc('day', to_timestamp(date / 1000) AT TIME ZONE 'UTC'),
+summary, body, response, recommend, reviewer_name, reviewer_email, helpfulness, reported
 FROM importreviews;
-
 
 
 CREATE TABLE reviews.reviews_products (
