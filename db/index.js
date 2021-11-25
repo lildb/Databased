@@ -132,7 +132,17 @@ SELECT COALESCE (
   RIGHT JOIN reviews.reviews_products ON
   (reviews.reviews_products.review_id=reviews.photos.review_id)
   WHERE (reviews.reviews_products.product_id=61588)
-  GROUP BY reviews.reviews_products.review_id;
+  GROUP BY reviews.reviews_products.review_id; // old
+
+
+
+SELECT COALESCE (
+  json_agg(json_build_object( 'id', reviews.photos.id, 'url', url) ) FILTER (WHERE url IS NOT NULL),
+  '[]' ) from reviews.photos
+  RIGHT JOIN reviews.list ON
+  (list.review_id=photos.review_id)
+  WHERE (product_id=61588)
+  GROUP BY reviews.list.review_id;
 
 reviews meta view: select statement:
 

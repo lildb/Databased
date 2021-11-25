@@ -109,3 +109,5 @@ coverage/
 
 **.pem
 **.cer
+
+.DS_Store
