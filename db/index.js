@@ -43,31 +43,25 @@ const getReviewsByProductId = (req, res) => {
     reviewer_email,
     helpfulness
     FROM reviews.list
-    INNER JOIN reviews.reviews_products ON
-    (reviews.list.id=reviews.reviews_products.review_id)
 
-    LEFT OUTER JOIN reviews.photos ON
-    (reviews.reviews_products.review_id=reviews.photos.review_id)
-
-    LEFT JOIN reviews.reviews_products ON
-   (reviews.photos.review_id=reviews.reviews_products.review_id)
-   WHERE (reviews.reviews_products.product_id=61588) LIMIT 50;
-
+    LEFT JOIN reviews.photos ON
+    (reviews.list.id=reviews.photos.review_id)
 
     WHERE (reviews.reviews_products.product_id=${product_id || 1})
     AND (reviews.list.reported=false) `;
 
   if (sort) {
     switch (sort) {
+      case
       case 'newest':
-        query += 'ORDER BY reviews.list.date DESC ';
+        query += 'ORDER BY date DESC ';
         break;
       case 'helpful':
-        query += 'ORDER BY reviews.list.helpfulness DESC ';
+        query += 'ORDER BY helpfulness DESC ';
         break;
       case 'relevant':
-        query += 'ORDER BY reviews.list.helpfulness DESC, ';
-        query += 'reviews.list.date DESC ';
+        query += 'ORDER BY helpfulness DESC, ';
+        query += 'date DESC ';
         break;
     }
   }
@@ -119,14 +113,15 @@ const postNewReview = (req, res) => {
   }
 }
 
+select * from reviews.list inner join reviews.photos on list.id=review_id where list.product_id=34564;
+
 
 /* selecting WITH photos:
 
 select * from reviews.list
-    INNER JOIN reviews.reviews_products ON
-    (reviews.list.id=reviews.reviews_products.review_id)
-    INNER JOIN reviews.photos ON (reviews.reviews_products.review_id=reviews.photos.review_id) WHERE (reviews.reviews_products.product_id=61588) LIMIT 50;
-    //very slow, look into rows_to_json
+    LEFT JOIN reviews.photos ON (reviews.list.id=reviews.photos.review_id) WHERE (reviews.list.product_id=61588) LIMIT 50;
+
+    returns all reviews, plus photos column if it exists
 
 
 selecting photos by review id AS array of objects:
@@ -138,6 +133,13 @@ SELECT COALESCE (
   (reviews.reviews_products.review_id=reviews.photos.review_id)
   WHERE (reviews.reviews_products.product_id=61588)
   GROUP BY reviews.reviews_products.review_id;
+
+reviews meta view: select statement:
+
+select * from reviews.meta where product_id=200650;
+ product_id |         ratings          |       recommended
+------------+--------------------------+-------------------------
+     200650 | {"1": 1, "3": 2, "4": 1} | {"true": 1, "false": 1}
 
 
     */
