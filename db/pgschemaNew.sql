@@ -64,11 +64,8 @@ date_trunc('day', to_timestamp(date / 1000) AT TIME ZONE 'UTC'),
 summary, body, response, recommend, reviewer_name, reviewer_email, helpfulness, reported
 FROM importreviews;
 
--- INSERT INTO reviews.list (review_id, product_id, rating, date, summary, body, response, recommend, reviewer_name, reviewer_email, helpfulness, reported)
--- SELECT review_id, product_id, rating,
--- date_trunc('day', to_timestamp(date / 1000) AT TIME ZONE 'UTC'),
--- summary, body, response, recommend, reviewer_name, reviewer_email, helpfulness, reported
--- FROM importreviews;
+
+DROP TABLE importreviews;
 
 
 CREATE TABLE reviews.photos (
@@ -100,12 +97,6 @@ CREATE INDEX rp_idx ON reviews.list (product_id, review_id, date, helpfulness); 
 CREATE INDEX rph_idx ON reviews.photos (review_id, id); --index reviews by review id, then photo id
 
 
--- CREATE OR REPLACE VIEW reviews.meta AS
--- SELECT product_id, jsonb_object_agg(rating, count) AS ratings
--- FROM (SELECT product_id, rating, count(*) from reviews.list group by product_id, rating) foo
--- GROUP BY product_id
--- ORDER BY product_id; --Count all reviews by product_id, convert into objects -- works
-
 CREATE OR REPLACE VIEW reviews.meta AS
 SELECT product_id,
 jsonb_object_agg(rating, count) AS ratings,
@@ -124,12 +115,6 @@ CREATE OR REPLACE VIEW photos_json AS SELECT COALESCE (
   (list.review_id=photos.review_id)
   GROUP BY reviews.list.product_id, reviews.list.review_id;
 
-
-
-
-
-
--- alter table reviews.products drop column ratings; alter table reviews.products add column ratings real; -- testing this while figuring out how to insert into, with the result of a select statement
 
 -- //////////////
 
@@ -206,4 +191,11 @@ psql -U ciele postgres -f ./db/pgschemaNew.sql
 where (reviews.list.product_id=3456);
 
 */
-sud0 psql postgres -f ./db/pgschemaNew.sql
+
+/*
+
+from EC2:
+
+sudo -u postgres psql -f ./db/pgschemaNew.sql
+
+*/
