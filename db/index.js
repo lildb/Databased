@@ -52,7 +52,6 @@ const getReviewsByProductId = (req, res) => {
 
   if (sort) {
     switch (sort) {
-      case
       case 'newest':
         query += 'ORDER BY date DESC ';
         break;
@@ -85,16 +84,18 @@ const postNewReview = (req, res) => {
     product_id,
     reviewer_name,
     reviewer_email,
-    date: date,
+    date,
     rating,
     summary,
     body,
     helpfulness, // default zero
     response, //default null
     recommend, //default true
-    photos, // how to handle
+    photos, // how to handle ?
     characteristics
   } = req.body;
+
+  date = date || Date.now();
 
   let query = {
     text: `INSERT INTO reviews.list (
@@ -113,7 +114,7 @@ const postNewReview = (req, res) => {
   }
 }
 
-select * from reviews.list inner join reviews.photos on list.id=review_id where list.product_id=34564;
+// select * from reviews.list inner join reviews.photos on list.id=review_id where list.product_id=34564;
 
 
 /* selecting WITH photos:
