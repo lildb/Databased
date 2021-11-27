@@ -102,18 +102,17 @@
 -- GROUP BY product_id
 -- ORDER BY product_id;
 
+CREATE OR REPLACE VIEW photos_json AS SELECT p.review_id COALESCE (
+  json_agg(json_build_object( 'id', p.id, 'url', url) ) FILTER (WHERE url IS NOT NULL),
+  '[]' ) photos, p.review_id  from reviews.photos p
+   JOIN reviews.list l ON
+  (l.review_id=photos.review_id)
+  GROUP BY photos.review_id;
 
--- CREATE OR REPLACE VIEW photos_json AS SELECT COALESCE (
---   json_agg(json_build_object( 'id', reviews.photos.id, 'url', url) ) FILTER (WHERE url IS NOT NULL),
---   '[]' ) photos from reviews.photos
---   RIGHT JOIN reviews.list ON
---   (list.review_id=photos.review_id)
---   GROUP BY reviews.list.product_id, reviews.list.review_id;
 
 
--- -- //////////////
 -- CREATE TYPE spec AS ENUM (
---   'quality','size','width','fit','length','comfort'
+--   'Quality','Size','Width','Fit','Length','Comfort'
 -- );
 
 -- CREATE TABLE IF NOT EXISTS reviews.specs (
@@ -121,7 +120,6 @@
 --   product_id INT NOT NULL REFERENCES reviews.products(id),
 --   name spec
 -- );
-
 
 
 -- CREATE TEMP TABLE importspecs (
@@ -132,11 +130,10 @@
 
 -- \copy importspecs from './csv/characteristics.csv' delimiter ',' csv header;
 
--- INSERT INTO reviews.specs SELECT s.id, product_id, LOWER(name)::spec FROM importspecs s
+-- INSERT INTO reviews.specs SELECT s.id, product_id, name::spec FROM importspecs s
 -- JOIN reviews.products p ON s.product_id=p.id;
 
 -- CREATE INDEX s_idx ON reviews.specs (product_id, id);
-
 
 
 
@@ -156,30 +153,61 @@
 -- );
 
 
--- \copy importspecreviews from './csv/characteristic_reviews.csv' delimiter ',' quote '"'csv header;
+-- \copy importspecreviews from './csv/characteristic_reviews.csv' delimiter ',' quote '"' csv header;
 
 -- INSERT INTO reviews.spec_reviews
 -- SELECT s.id, characteristic_id, review_id, value
 -- FROM importspecreviews s;
 
 
--- CREATE INDEX s_avg ON reviews.spec_reviews (review_id, characteristic_id, value);
+CREATE INDEX s_avg ON reviews.spec_reviews (characteristic_id);
 
-CREATE OR REPLACE VIEW specs_avg AS
-SELECT jsonb_object_agg(characteristic_id, value) AS avgs
-FROM (SELECT review_id, characteristic_id, value, count(*)
-FROM reviews.spec_reviews -- is taking the cout and not the AVG() -- fix this syntax
--- maybe create another view first that aggregates based on characteristic_id ?
-GROUP BY review_id, characteristic_id, value) foo
-GROUP BY review_id;
+SELECT product_id, id FROM reviews.specs GROUP BY product_id;
 
--- get product id from specs, join on reviews, select average of reviews compile into an object.
--- create an index on the view or use a materialized view?
+-- selects averages by characteristic id
+
+CREATE OR REPLACE VIEW product_spec_object AS
+SELECT product_id, jsonb_object_agg(id, avg) as characteristics
+FROM (SELECT product_id, s.id, avg(value)
+FROM reviews.specs s
+JOIN reviews.spec_reviews r
+ON s.id=r.characteristic_id
+GROUP BY product_id, s.id) baz
+GROUP BY product_id; -- works but need to add names and id as nested object
+
+
+
+CREATE OR REPLACE VIEW spec_avgs AS
+SELECT r.characteristic_id, avg(value)
+FROM reviews.spec_reviews r
+GROUP BY r.characteristic_id
+ORDER BY r.characteristic_id; --aggregate averages by characteristic_id
+
+
+
+CREATE OR REPLACE VIEW product_specs AS
+SELECT product_id, name, characteristic_id FROM reviews.specs s
+GROUP BY product_id, characteristic_id, name
+ORDER BY product_id;
+-- associate spec IDs with each product
+
+CREATE MATERIALIZED VIEW specs_meta AS
+select * from product_specs FULL JOIN spec_avgs ON spec_avgs.characteristic_id=product_specs.id ORDER BY product_id;
+-- returns product_id, name, spec id, characteristic_id avg
+
+CREATE INDEX s_m_idx ON specs_meta (product_id, id);
+
 -- incorporate into reviews.meta ...
 
 /* FOR REFERENCE
 
--- CREATE OR REPLACE VIEW reviews.meta AS //
+  "characteristics": {
+      "Fit": {
+          "id": 206732,
+          "value": "3.0833333333333333"
+      }
+
+-- CREATE OR REPLACE VIEW reviews.meta AS
 -- SELECT product_id,
 -- jsonb_object_agg(rating, count) AS ratings,
 -- jsonb_object_agg(recommend, count) AS recommended

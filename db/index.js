@@ -32,23 +32,20 @@ const getReviewsByProductId = (req, res) => {
     page,
   };
 
-  let query = `SELECT reviews.list.id AS review_id,
-    rating,
-    summary,
-    recommend,
-    response,
-    body,
-    date,
-    reviewer_name,
-    reviewer_email,
-    helpfulness
-    FROM reviews.list
+  let query = `SELECT * from reviews.list l
+    INNER JOIN photos_json p
+    ON l.review_id=p.review_id
+    WHERE l.product_id=${product_id || 1}
+    AND (l.reported=false) `;
 
-    LEFT JOIN reviews.photos ON
-    (reviews.list.id=reviews.photos.review_id)
+  let oldQuery = `SELECT *
+    FROM reviews.list l
 
-    WHERE (reviews.reviews_products.product_id=${product_id || 1})
-    AND (reviews.list.reported=false) `;
+    LEFT JOIN reviews.photos p ON
+    (l.review_id=p.review_id)
+
+    WHERE (l.product_id=${product_id || 1})
+    AND (l.reported=false) `;
 
   if (sort) {
     switch (sort) {

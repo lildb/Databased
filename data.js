@@ -149,11 +149,3 @@ var getReviewsMeta = {
       }
   }
 };
-
-var postReviews = {};
-
-var putReviews = {};
-
-var reviewsHelpful = {};
-
-var reviewsReport = {};
