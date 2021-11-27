@@ -33,18 +33,11 @@ const getReviewsByProductId = (req, res) => {
   };
 
   let query = `SELECT * from reviews.list l
+
     INNER JOIN photos_json p
     ON l.review_id=p.review_id
+
     WHERE l.product_id=${product_id || 1}
-    AND (l.reported=false) `;
-
-  let oldQuery = `SELECT *
-    FROM reviews.list l
-
-    LEFT JOIN reviews.photos p ON
-    (l.review_id=p.review_id)
-
-    WHERE (l.product_id=${product_id || 1})
     AND (l.reported=false) `;
 
   if (sort) {
@@ -85,11 +78,11 @@ const postNewReview = (req, res) => {
     rating,
     summary,
     body,
-    helpfulness, // default zero
-    response, //default null
+    // helpfulness, // default zero
+    // response, //default null
     recommend, //default true
     photos, // how to handle ?
-    characteristics
+    characteristics //object of key/ value pairs
   } = req.body;
 
   date = date || Date.now();
@@ -105,11 +98,27 @@ const postNewReview = (req, res) => {
       $6,
       $7
     ) `,
+
+    // use rollback ?
     values: [
 
     ]
   }
 }
+
+const getMetaByProductId = (req, res) => {
+  let { product_id } = req.query;
+
+  let query = `SELECT * from reviews.meta
+    WHERE product_id=${product_id}`
+
+  pool.query(query, (error, results) => {
+    if (error) {
+      return res.status(400).send(error.stack);
+    }
+    res.status(200).send(results?.rows);
+  });
+};
 
 // select * from reviews.list inner join reviews.photos on list.id=review_id where list.product_id=34564;
 
@@ -183,6 +192,7 @@ const reportReview = (req, res) => {
 module.exports = {
   benchmark,
   getReviewsByProductId,
+  getMetaByProductId,
   markAsHelpful,
   reportReview,
   postNewReview
