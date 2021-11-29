@@ -24,7 +24,7 @@ const benchmark = (req, res) => {
 };
 
 const getReviewsByProductId = (req, res) => {
-  let { product_id, sort, page = 1, count = 5 } = req.query;
+  let { product_id = 1, sort, page = 1, count = 5 } = req.query;
 
   let queryResult = {
     product: String(product_id),
@@ -37,7 +37,7 @@ const getReviewsByProductId = (req, res) => {
     LEFT JOIN photos_json p
     ON p.review_id=l.review_id
 
-    WHERE l.product_id=${product_id || 1}
+    WHERE l.product_id=${product_id}
     AND (l.reported=false) `;
 
   if (sort) {
@@ -83,21 +83,34 @@ const postNewReview = (req, res) => {
     reviewer_name,
     reviewer_email,
     characteristics, //object of key/ value pairs
-  } = req.body;
+  } = req.query;
+  console.log(req.query, 'query')
+  console.log(req.body, 'body')
 
   date = date || Date.now();
   characteristics = characteristics || {};
+  photos = photos || [];
 
   let values = [
-    product_id,
-    rating,
+    65432,
+    5,
     date,
-    summary,
-    body,
-    recommend,
-    reviewer_name,
-    reviewer_email
+    'stuff',
+    'junk',
+    false,
+    'personne',
+    'setom@place.zed'
   ];
+  // let values = [
+  //   product_id,
+  //   rating,
+  //   date,
+  //   summary,
+  //   body,
+  //   recommend,
+  //   reviewer_name,
+  //   reviewer_email
+  // ];
 
   let specs = [];
 
@@ -105,10 +118,10 @@ const postNewReview = (req, res) => {
     specs.push(`(${characteristics}, ${characteristics[key]}) `);
   }
 
-  let $values = values.map((el, i) => el = '$' + (i+1)).join(); //$1,$2,$3...
+  let $values = values.map((el, i) => el = ' $' + (i+1)).join(); //$1,$2,$3...
   let $specs = specs.map((el, i) => el = '$' + (i+1)).join();
 
-  let reviewText = `INSERT INTO list (
+  let reviewText = `INSERT INTO list(
     product_id,
     rating,
     date,
@@ -119,16 +132,21 @@ const postNewReview = (req, res) => {
     reviewer_email
     )
 
-    VALUES ( ${$values} ); `;
 
-  let photosText = `INSERT INTO spec_reviews (
-    characteristic_id,
-    (SELECT max(review_id) from list) review_id,
-    value
-    ) VALUES ${$specs} `;
+    VALUES  ${$values} ; `;
+    console.log(reviewText)
+    console.log(values)
+
+    // date_trunc('day', to_timestamp(date / 1000) AT TIME ZONE 'UTC'),
+
+  // let specsText = `INSERT INTO spec_reviews (
+  //   characteristic_id,
+  //   (SELECT max(review_id) from list) review_id,
+  //   value
+  //   ) VALUES ${$specs} `;
 
   let reviewQuery = { text: reviewText, values };
-  let photosQuery = { text: photosText, values: specs };
+  // let specsQuery = { text: specsText, values: specs };
 
   pool.query(reviewQuery, (error, results) => {
     if (error) {
@@ -136,11 +154,11 @@ const postNewReview = (req, res) => {
     } res.status(201).send(results?.rows);
   });
 
-  pool.query(photosQuery, (error, results) => {
-    if (error) {
-      return res.status(400).send(error.stack);
-    } res.status(201).send(results?.rows);
-  });
+  // pool.query(specsQuery, (error, results) => {
+  //   if (error) {
+  //     return res.status(400).send(error.stack);
+  //   } res.status(201).send(results?.rows);
+  // });
 };
 
 const getMetaByProductId = (req, res) => {
