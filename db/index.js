@@ -108,7 +108,7 @@ const postNewReview = (req, res) => {
   let $values = values.map((el, i) => el = '$' + (i+1)).join(); //$1,$2,$3...
   let $specs = specs.map((el, i) => el = '$' + (i+1)).join();
 
-  let text = `INSERT INTO list (
+  let reviewText = `INSERT INTO list (
     product_id,
     rating,
     date,
@@ -121,14 +121,14 @@ const postNewReview = (req, res) => {
 
     VALUES ( ${$values} ); `;
 
-  text += `INSERT INTO spec_reviews (
+  let photosText = `INSERT INTO spec_reviews (
     characteristic_id,
     (SELECT max(review_id) from list) review_id,
     value
-    ) VALUES ${$specs} `; //use prepared statement instead
+    ) VALUES ${$specs} `; /
 
-  let reviewQuery = { text, values };
-  let photosQuery = { text, specs };
+  let reviewQuery = { text: reviewText, values };
+  let photosQuery = { text: photosText, values: specs };
 
   pool.query(reviewQuery, (error, results) => {
     if (error) {

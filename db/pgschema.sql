@@ -208,11 +208,11 @@ CREATE OR REPLACE VIEW meta_recs AS
 
 
 CREATE OR REPLACE VIEW meta_all AS
-  SELECT meta_recs.product_id, ratings, recommended,
+  SELECT recs.product_id, ratings, recommended,
   characteristics FROM meta_rates rates
 
   RIGHT JOIN meta_recs recs
-  ON rates.product_id=meta_recs.product_id
+  ON rates.product_id=recs.product_id
 
   RIGHT JOIN meta_specs_object obj
   ON rates.product_id=obj.product_id;
