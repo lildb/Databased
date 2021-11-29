@@ -157,7 +157,6 @@ CREATE INDEX s_avg ON spec_reviews (characteristic_id);
 
 
 
-
 CREATE OR REPLACE VIEW spec_avgs AS
   SELECT sr.characteristic_id, avg(value) AS value
   FROM spec_reviews sr
@@ -170,6 +169,7 @@ CREATE OR REPLACE VIEW product_specs AS
   ORDER BY product_id;
 
 
+--Aggregate product characteristics by product_id
 CREATE MATERIALIZED VIEW meta_specs AS
 SELECT * FROM product_specs ps
 FULL OUTER JOIN spec_avgs sa
@@ -178,13 +178,16 @@ ORDER BY product_id;
 
 CREATE INDEX s_m_idx ON meta_specs (product_id, id);
 
+
+--Calculate averages and format into a nexted object
 CREATE OR REPLACE VIEW meta_specs_object AS
 SELECT product_id, json_object_agg(name, averages) AS characteristics
 FROM (SELECT json_build_object('id', id, 'value', value) averages, product_id, name
 FROM (SELECT product_id, name, id, value from meta_specs) foo GROUP BY product_id, name, id, value) bar
 GROUP BY product_id;
 
-CREATE OR REPLACE VIEW meta_rate AS
+
+CREATE OR REPLACE VIEW meta_rates AS
   SELECT product_id,
   jsonb_object_agg(rating, count) AS ratings
   FROM (SELECT product_id, rating, count(*)
@@ -193,8 +196,7 @@ CREATE OR REPLACE VIEW meta_rate AS
   GROUP BY product_id
   ORDER BY product_id;
 
-
-CREATE OR REPLACE VIEW meta_rec AS
+CREATE OR REPLACE VIEW meta_recs AS
   SELECT product_id,
   jsonb_object_agg(recommend, count) AS recommended
   FROM (SELECT product_id, recommend, count(*)
@@ -203,15 +205,17 @@ CREATE OR REPLACE VIEW meta_rec AS
   GROUP BY product_id
   ORDER BY product_id;
 
+
+
 CREATE OR REPLACE VIEW meta_all AS
-  SELECT meta_rec.product_id, ratings, recommended,
-  characteristics FROM meta_rate rate
+  SELECT meta_recs.product_id, ratings, recommended,
+  characteristics FROM meta_rates rates
 
-  RIGHT JOIN meta_rec
-  ON rate.product_id=meta_rec.product_id
+  RIGHT JOIN meta_recs recs
+  ON rates.product_id=meta_recs.product_id
 
-  RIGHT JOIN meta_specs_object
-  ON rate.product_id=meta_specs_object.product_id;
+  RIGHT JOIN meta_specs_object obj
+  ON rates.product_id=obj.product_id;
 
 
 
