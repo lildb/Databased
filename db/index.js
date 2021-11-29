@@ -125,7 +125,7 @@ const postNewReview = (req, res) => {
     characteristic_id,
     (SELECT max(review_id) from list) review_id,
     value
-    ) VALUES ${$specs} `; /
+    ) VALUES ${$specs} `;
 
   let reviewQuery = { text: reviewText, values };
   let photosQuery = { text: photosText, values: specs };
