@@ -1,4 +1,4 @@
-var getReviews = ={
+var getReviews ={
   "product": "61593",
   "page": 0,
   "count": 5,
