@@ -35,7 +35,7 @@ const getReviewsByProductId = (req, res) => {
   let query = `SELECT * from list l
 
     LEFT JOIN photos_json p
-    ON p.review_id=l.review_id
+    ON l.review_id=p.review_id
 
     WHERE l.product_id=${product_id}
     AND (l.reported=false) `;
@@ -64,7 +64,7 @@ const getReviewsByProductId = (req, res) => {
     if (error) {
       return res.status(400).send(error.stack);
     }
-    queryResult.results = results?.rows;
+    queryResult.results = results.rows || [];
     res.status(200).send(queryResult);
   });
 };
@@ -88,6 +88,7 @@ const postNewReview = (req, res) => {
   console.log(req.body, 'body')
 
   date = date || Date.now();
+  date = new Date(date).toISOString();
   characteristics = characteristics || {};
   photos = photos || [];
 
@@ -101,6 +102,7 @@ const postNewReview = (req, res) => {
     'personne',
     'setom@place.zed'
   ];
+
   // let values = [
   //   product_id,
   //   rating,
@@ -121,7 +123,7 @@ const postNewReview = (req, res) => {
   let $values = values.map((el, i) => el = ' $' + (i+1)).join(); //$1,$2,$3...
   let $specs = specs.map((el, i) => el = '$' + (i+1)).join();
 
-  let reviewText = `INSERT INTO list(
+  let reviewText = `INSERT INTO list (
     product_id,
     rating,
     date,
@@ -133,7 +135,7 @@ const postNewReview = (req, res) => {
     )
 
 
-    VALUES  ${$values} ; `;
+    VALUES  ( ${$values} ) ; `;
     console.log(reviewText)
     console.log(values)
 
@@ -151,7 +153,7 @@ const postNewReview = (req, res) => {
   pool.query(reviewQuery, (error, results) => {
     if (error) {
       return res.status(400).send(error.stack);
-    } res.status(201).send(results?.rows);
+    } res.status(201).send(results);
   });
 
   // pool.query(specsQuery, (error, results) => {

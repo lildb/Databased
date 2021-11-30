@@ -104,7 +104,13 @@ CREATE INDEX rph_idx ON photos (review_id, id);
 CREATE OR REPLACE VIEW photos_json AS SELECT p.review_id, COALESCE (
 json_agg(json_build_object( 'id', p.id, 'url', url))
 FILTER (WHERE url IS NOT NULL),
-'[]' ) photos_array --will this change column header?
+'[]'::json ) photos
+FROM photos p
+GROUP BY p.review_id;
+
+CREATE OR REPLACE VIEW photos_json AS SELECT p.review_id, COALESCE (
+json_agg(json_build_object( 'id', p.id, 'url', url)),
+'[]' ) photos
 FROM photos p
 GROUP BY p.review_id;
 
