@@ -108,11 +108,14 @@ FILTER (WHERE url IS NOT NULL),
 FROM photos p
 GROUP BY p.review_id;
 
-CREATE OR REPLACE VIEW photos_json AS SELECT p.review_id, COALESCE (
-json_agg(json_build_object( 'id', p.id, 'url', url)),
-'[]' ) photos
+CREATE OR REPLACE VIEW photos_json AS SELECT
+p.review_id,
+json_agg(json_build_object( 'id', p.id, 'url', url))
+FILTER (WHERE url IS NOT NULL) photos
 FROM photos p
-GROUP BY p.review_id;
+GROUP BY p.review_id; -- skips coalesce step
+
+
 
 
 CREATE TYPE spec AS ENUM (
