@@ -19,12 +19,14 @@ const benchmark = (req, res) => {
     if (error) {
       return res.status(400).send(error.stack);
     }
-    res.status(200).send(results?.rows);
+    res.status(200).send('<h1>' + results?.rows?.[0]?.['?column?'] + '</h1>');
   });
 };
 
 const getReviewsByProductId = (req, res) => {
-  let { product_id = 1, sort, page = 1, count = 5 } = req.query;
+  let { product_id, sort, page = 1, count = 5 } = req.query;
+
+  if (!product_id) res.status(400).send('Invalid Product ID')
 
   let queryResult = {
     product: String(product_id),
@@ -32,13 +34,11 @@ const getReviewsByProductId = (req, res) => {
     page,
   };
 
+  // let photosQuery = `LEFT JOIN photos_json p
+  // ON l.review_id=p.review_id` // returns null instead of empty array
+
   let query = `SELECT * from list l
-
-    LEFT JOIN photos_json p
-    ON l.review_id=p.review_id
-
-    WHERE l.product_id=${product_id}
-    AND (l.reported=false) `;
+    WHERE l.product_id=${product_id} `;
 
   if (sort) {
     switch (sort) {
@@ -85,23 +85,11 @@ const postNewReview = (req, res) => {
     characteristics, //object of key/ value pairs
   } = req.query;
   console.log(req.query, 'query')
-  console.log(req.body, 'body')
 
   date = date || Date.now();
   date = new Date(date).toISOString();
   characteristics = characteristics || {};
   photos = photos || [];
-
-  let values = [
-    65432,
-    5,
-    date,
-    'stuff',
-    'junk',
-    false,
-    'personne',
-    'setom@place.zed'
-  ];
 
   // let values = [
   //   product_id,
@@ -112,7 +100,7 @@ const postNewReview = (req, res) => {
   //   recommend,
   //   reviewer_name,
   //   reviewer_email
-  // ];
+  // ]; // all undefined...
 
   let specs = [];
 
@@ -133,7 +121,6 @@ const postNewReview = (req, res) => {
     reviewer_name,
     reviewer_email
     )
-
 
     VALUES  ( ${$values} ) ; `;
     console.log(reviewText)

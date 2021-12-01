@@ -104,18 +104,9 @@ CREATE INDEX rph_idx ON photos (review_id, id);
 CREATE OR REPLACE VIEW photos_json AS SELECT p.review_id, COALESCE (
 json_agg(json_build_object( 'id', p.id, 'url', url))
 FILTER (WHERE url IS NOT NULL),
-'[]'::json ) photos
+'[]') photos
 FROM photos p
 GROUP BY p.review_id;
-
-CREATE OR REPLACE VIEW photos_json AS SELECT
-p.review_id,
-json_agg(json_build_object( 'id', p.id, 'url', url))
-FILTER (WHERE url IS NOT NULL) photos
-FROM photos p
-GROUP BY p.review_id; -- skips coalesce step
-
-
 
 
 CREATE TYPE spec AS ENUM (
@@ -195,7 +186,7 @@ CREATE INDEX s_m_idx ON meta_specs (product_id, id);
 --Calculate averages and format into a nexted object
 CREATE OR REPLACE VIEW meta_specs_object AS
 SELECT product_id, json_object_agg(name, averages) AS characteristics
-FROM (SELECT json_build_object('id', id, 'value', value) averages, product_id, name
+FROM (SELECT json_build_object('id', id, 'value', value::text) averages, product_id, name
 FROM (SELECT product_id, name, id, value from meta_specs) foo GROUP BY product_id, name, id, value) bar
 GROUP BY product_id;
 
@@ -203,7 +194,7 @@ GROUP BY product_id;
 CREATE OR REPLACE VIEW meta_rates AS
   SELECT product_id,
   jsonb_object_agg(rating, count) AS ratings
-  FROM (SELECT product_id, rating, count(*)
+  FROM (SELECT product_id, rating, count(*)::text
   FROM list
   GROUP BY product_id, rating) foo
   GROUP BY product_id
@@ -212,7 +203,7 @@ CREATE OR REPLACE VIEW meta_rates AS
 CREATE OR REPLACE VIEW meta_recs AS
   SELECT product_id,
   jsonb_object_agg(recommend, count) AS recommended
-  FROM (SELECT product_id, recommend, count(*)
+  FROM (SELECT product_id, recommend, count(*)::text
   FROM list
   GROUP BY product_id, recommend) foo
   GROUP BY product_id
