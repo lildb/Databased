@@ -225,6 +225,6 @@ CREATE OR REPLACE VIEW meta_all AS
 
 /*  Execute this file from the command line by typing:
 
-psql postgres -f ./server/db/pgschema.sql
+psql postgres -f ./db/pgschema.sql
 
  */
