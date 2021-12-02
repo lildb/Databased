@@ -13,7 +13,3 @@ app.listen(PORT, (req, res) => {
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
 app.use('/reviews', reviews);
-
-app.get('/', (req, res) => {
-  res.redirect('/reviews')
-});
