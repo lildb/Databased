@@ -1,4 +1,4 @@
-require('dotenv').config('../');
+require('dotenv').config();
 const { Pool } = require('pg');
 
 const config = {
@@ -53,11 +53,11 @@ const getReviewsByProductId = (req, res) => {
     }
   }
 
+
   query += ` OFFSET ${parseInt(page * count - count)}`;
   query += ` LIMIT ${count};`;
 
   console.log(query);
-
   pool.query(query, (error, results) => {
     if (error) {
       return res.status(400).send('Invalid product_id');
