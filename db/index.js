@@ -1,4 +1,4 @@
-require('dotenv').config();
+require('dotenv').config('../');
 const { Pool } = require('pg');
 
 const config = {
@@ -25,8 +25,6 @@ const benchmark = (req, res) => {
 
 const getReviewsByProductId = (req, res) => {
   let { product_id, sort, page = 1, count = 5 } = req.query;
-
-  if (!product_id) res.status(400).send('Invalid Product ID')
 
   let queryResult = {
     product: String(product_id),
@@ -62,7 +60,7 @@ const getReviewsByProductId = (req, res) => {
 
   pool.query(query, (error, results) => {
     if (error) {
-      return res.status(400).send(error.stack);
+      return res.status(400).send('Invalid product_id');
     }
     queryResult.results = results.rows || [];
     res.status(200).send(queryResult);
@@ -142,12 +140,6 @@ const postNewReview = (req, res) => {
       return res.status(400).send(error.stack);
     } res.status(201).send(results);
   });
-
-  // pool.query(specsQuery, (error, results) => {
-  //   if (error) {
-  //     return res.status(400).send(error.stack);
-  //   } res.status(201).send(results?.rows);
-  // });
 };
 
 const getMetaByProductId = (req, res) => {
