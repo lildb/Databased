@@ -1,5 +1,5 @@
 # Databased
-Ratings and Reviews API - Software Design Capstone - Hack Reactor
+A redesigned Rest API using Express.js, PostgreSQL, NGINX, and PM2. Deployed on AWS t2.micro instances, and tested with k6 and Loader.io.
 
 ## 1. Install node_modules - you will need to have *Node* installed
 - run `npm install` to install dependencies 
