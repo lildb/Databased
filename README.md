@@ -29,7 +29,7 @@ To run the node server locally:
 
 
 
-## PostgreSQL Database
+## PostgreSQL Database :floppy_disk:
 
 The following instructions were used for installing and configuring *Postgres* `v14` on both **Ubuntu 20.04** and **macOS** systems.
 
@@ -164,6 +164,15 @@ GRANT ALL TO your_username ON your_database;
 [Getting Started With PostgreSQL](https://www.postgresql.org/docs/14/tutorial-start.html)
 [DOCS](https://www.postgresql.org/docs/)
 
+
+Basic SQL commands in PostgreSQL to get you started:
+
+- `\q` - Exit psql
+- `\l` or `\l+` - List databases
+- `\dt` or `dt+` - List tables
+- `\c` + `<your_database>` to change to a different database
+
+- Press `q` to close a command menu if the terminal displays a `:` or `(END)`
 
 
 ### 5. Run the .SQL script to load the csv files into the database
