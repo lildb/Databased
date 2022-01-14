@@ -1,3 +1,8 @@
+/*
+* TO EXECUTE THIS FILE:
+* 
+*/
+
 DROP DATABASE reviews;
 
 CREATE DATABASE reviews;
