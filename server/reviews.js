@@ -5,7 +5,6 @@ const db = require('../db/');
 
 reviews.get('/', db.getReviewsByProductId);
 reviews.get('/meta', db.getMetaByProductId);
-reviews.get('/benchmark', db.benchmark);
 
 reviews.post('/', db.postNewReview);
 
