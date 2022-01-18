@@ -239,29 +239,30 @@ server {
 
 ## Using the API
 
-### Base endpoint
-
-Will return an error message without a `product_id`:
+### Base endpoint:
 
 ```http
-   GET /reviews/
+  /reviews/
 ```
 
-### `product_id` is required for all endpoints
 
-##### `GET` reviews for a `product_id`
+#### `product_id` is required for *all endpoints*
+
+
+### `GET` reviews for a `product_id`
 
 ```http
   GET /reviews/&product_id=12345
 ```
 
-Example with multiple query parameters:
+##### Example with multiple query parameters:
 
 ```http
   GET /reviews/&product_id=12345&sort=date&count=10
 ```
 
 ###### Query Parameters
+
 | Parameter | Type     | Required | Description                    |
 | :-------- | :------: | :-----: | :------------------------------- |
 | `product_id` | `int` | *YES* | Will return an error if invalid   |
@@ -269,7 +270,11 @@ Example with multiple query parameters:
 | `count` | `int` | NO | Results per page. Default 5               |
 | `page` | `int` | NO | Which page of results to return. Default 1 |
 
+---
 
+### Meta endpoint
+
+Returns metadata for a current project
 
 ```http
   GET /reviews/meta:product_id
@@ -279,22 +284,58 @@ Example with multiple query parameters:
 | :-------- | :-----: | :----: | :------------------------------- |
 | `product_id` | `int` | *YES* | Will return an error if invalid   |
 
-
-
-
-```http
-  GET /reviews/meta/&product_id
+```json
+{
+  "product_id": "2",
+  "ratings": {
+    2: 1,
+    3: 1,
+    4: 2,
+    // ...
+  },
+  "recommended": {
+    0: 5
+    // ...
+  },
+  "characteristics": {
+    "Size": {
+      "id": 14,
+      "value": "4.0000"
+    },
+    "Width": {
+      "id": 15,
+      "value": "3.5000"
+    },
+    "Comfort": {
+      "id": 16,
+      "value": "4.0000"
+    },
+    // ...
+}
 ```
 
-| Parameter | Type     | Required | Description                    |
-| :-------- | :------- | :------| :------------------------------- |
-| `product_id` | `int` | *YES* | Will return an error if invalid   |
 
+---
 
 ### `POST` New Reviews
 
 ```http
   POST /reviews
+```
+
+##### Inserts a new review into the database. 
+
+#### Photos **must** be an array of objects, formatted as such:
+
+```json
+  [
+    {
+      "url": "https://link.to/photo1.jpg"
+    },
+    {
+      "url": "https://link.to/photo2.jpg"
+    }
+  ]
 ```
 
 ###### Body Parameters
