@@ -256,4 +256,5 @@ server {
 <a href="https://github.com/sbarkerdudley">
   <img src="https://contrib.rocks/image?repo=lildb/Databased" /><br />
 </a>
-###### S. Barker Dudley
+
+##### [S. Barker Dudley](https://github.com/sbarkerdudley)
