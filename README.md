@@ -239,16 +239,100 @@ server {
 
 ## Using the API
 
+### Base endpoint
+
+Will return an error message without a `product_id`:
+
+```http
+   GET /reviews/
+```
+
+### `product_id` is required for all endpoints
+
+##### `GET` reviews for a `product_id`
+
 ```http
   GET /reviews/&product_id=12345
+```
+
+Example with multiple query parameters:
+
+```http
+  GET /reviews/&product_id=12345&sort=date&count=10
+```
+
+###### Query Parameters
+| Parameter | Type     | Required | Description                    |
+| :-------- | :------: | :-----: | :------------------------------- |
+| `product_id` | `int` | *YES* | Will return an error if invalid   |
+| `sort` | `string` | NO | `date`, `relevance`, `helpful`. Default 'relevance' sorts by date first, then by average helpfulness |
+| `count` | `int` | NO | Results per page. Default 5               |
+| `page` | `int` | NO | Which page of results to return. Default 1 |
+
+
+
+```http
+  GET /reviews/meta:product_id
+```
+
+| Parameter | Type     | Required | Description                    |
+| :-------- | :-----: | :----: | :------------------------------- |
+| `product_id` | `int` | *YES* | Will return an error if invalid   |
+
+
+
+
+```http
+  GET /reviews/meta/&product_id
 ```
 
 | Parameter | Type     | Required | Description                    |
 | :-------- | :------- | :------| :------------------------------- |
 | `product_id` | `int` | *YES* | Will return an error if invalid   |
-| `sort` | `string` | NO | `date`, `relevance`, `helpful`          |
-| `count` | `int` | NO | Results per page. Default 5               |
-| `page` | `int` | NO | Which page of results to return. Default 1 |
+
+
+### `POST` New Reviews
+
+```http
+  POST /reviews
+```
+
+###### Body Parameters
+
+| Parameter |	Type | Required |	Description                                |
+| :-------- | :---- | :---: | :------------------------------------------- |
+| product_id | integer | **YES** | Required ID |
+| rating |	int | NO |	Integer (1-5) indicating the review rating
+| summary |	text	 | NO |Summary text of the review
+| body |	text | NO |	Continued or full text of the review
+| recommend |	bool | NO |	Value indicating if the reviewer recommends the product
+| name |	text | **YES** |	Username for question asker
+| email |	text | **YES** |	Email address for question asker
+| photos |	[text] | NO |	Array of text urls that link to images to be shown
+| characteristics |	object | NO |	Object of keys representing characteristic_id and values. { "14": 5, "15": 5 //...} |
+
+
+### Mark Review as Helpful
+
+```http
+  PUT /reviews/:review_id/helpful
+```
+
+| Parameter | Type     | Required | Description                    |
+| :-------- | :------- | :------| :------------------------------- |
+| `product_id` | `int` | *YES* | Will return an error if invalid   |
+
+
+### Report Review
+
+```http
+  PUT /reviews/:review_id/report
+```
+Updates a review to show it was reported. Note, this action does not delete the review, but the review will not be returned in the above GET request.
+
+| Parameter | Type     | Required | Description                    |
+| :-------- | :------- | :------| :------------------------------- |
+| `product_id` | `int` | *YES* | Will return an error if invalid   |
 
 
 ### Author
