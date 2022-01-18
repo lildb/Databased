@@ -339,15 +339,15 @@ Returns metadata for a current project
 
 | Parameter |	Type | Required |	Description                                |
 | :-------- | :---- | :---: | :------------------------------------------- |
-| product_id | integer | **YES** | Required ID |
-| rating |	int | NO |	Integer (1-5) indicating the review rating
-| summary |	text	 | NO |Summary text of the review
-| body |	text | NO |	Continued or full text of the review
-| recommend |	bool | NO |	Value indicating if the reviewer recommends the product
-| name |	text | **YES** |	Username for question asker
-| email |	text | **YES** |	Email address for question asker
-| photos |	[text] | NO |	Array of text urls that link to images to be shown
-| characteristics |	object | NO |	Object of keys representing characteristic_id and values. { "14": 5, "15": 5 //...} |
+| product_id | `integer` | **YES** | Required ID |
+| rating |	`int` | NO |	Integer (1-5) indicating the review rating
+| summary |	`text`	 | NO |Summary text of the review
+| body |	`text` | NO |	Continued or full text of the review
+| recommend |	`bool` | NO |	Value indicating if the reviewer recommends the product
+| name |	`text` | **YES** |	Username for question asker
+| email |	`text` | **YES** |	Email address for question asker
+| photos |	`[text]` | NO |	Array of text urls that link to images to be shown
+| characteristics |	`object` | NO |	Object of keys representing characteristic_id and values. { "14": 5, "15": 5 //...} |
 
 
 ### Mark Review as Helpful
@@ -357,8 +357,8 @@ Returns metadata for a current project
 ```
 
 | Parameter | Type     | Required | Description                    |
-| :-------- | :------- | :------| :------------------------------- |
-| `product_id` | `int` | *YES* | Will return an error if invalid   |
+| :-------- | :------- | :-----: | :------------------------------- |
+| `product_id` | `int` | **YES** | Will return an error if invalid   |
 
 
 ### Report Review
@@ -369,8 +369,8 @@ Returns metadata for a current project
 Updates a review to show it was reported. Note, this action does not delete the review, but the review will not be returned in the above GET request.
 
 | Parameter | Type     | Required | Description                    |
-| :-------- | :------- | :------| :------------------------------- |
-| `product_id` | `int` | *YES* | Will return an error if invalid   |
+| :-------- | :------- | :-----: | :------------------------------- |
+| `product_id` | `int` | **YES** | Will return an error if invalid   |
 
 
 ### Author
