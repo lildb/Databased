@@ -244,7 +244,7 @@ server {
 ```
 
 | Parameter | Type     | Required | Description                    |
-| :-------- | :------- | :------| :-------------------             |
+| :-------- | :------- | :------| :------------------------------- |
 | `product_id` | `int` | *YES* | Will return an error if invalid   |
 | `sort` | `string` | NO | `date`, `relevance`, `helpful`          |
 | `count` | `int` | NO | Results per page. Default 5               |
@@ -253,7 +253,7 @@ server {
 
 ### Author
 
-<a href="https://github.com/lildb/Databased/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=lildb/Databased" />
+<a href="https://github.com/sbarkerdudley">
+  <img src="https://contrib.rocks/image?repo=lildb/Databased" /><br />
+  **Sam Dudley**
 </a>
-- [Sam Dudley](https://github.com/sbarkerdudley)
