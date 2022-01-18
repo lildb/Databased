@@ -243,11 +243,11 @@ server {
   GET /reviews/&product_id=12345
 ```
 
-| Parameter | Type     | Required | Description |
-| :-------- | :------- | :------| :------------------- |
-| `product_id` | `int` | *YES* | Will return an error if invalid |
-| `sort` | `string` | NO | `date`, `relevance`, `helpful` |
-| `count` | `int` | NO | Results per page. Default 5 |
+| Parameter | Type     | Required | Description                    |
+| :-------- | :------- | :------| :-------------------             |
+| `product_id` | `int` | *YES* | Will return an error if invalid   |
+| `sort` | `string` | NO | `date`, `relevance`, `helpful`          |
+| `count` | `int` | NO | Results per page. Default 5               |
 | `page` | `int` | NO | Which page of results to return. Default 1 |
 
 
