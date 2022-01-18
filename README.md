@@ -329,12 +329,9 @@ Returns metadata for a current project
 
 ```json
   [
-    {
-      "url": "https://link.to/photo1.jpg"
-    },
-    {
-      "url": "https://link.to/photo2.jpg"
-    }
+    "https://link.to/photo1.jpg",
+    "https://link.to/photo2.jpg",
+    // ...
   ]
 ```
 
