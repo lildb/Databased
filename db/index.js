@@ -6,151 +6,215 @@ const config = {
   host: process.env.PGHOST,
   port: process.env.PGPORT,
   password: process.env.PGPASSWORD,
-  max: 20,
-  rowMode: 'array',
+  rowMode: 'array', // Specify return format of query results
+  max: 20, // Maximum pool connections - OPTIONAL - Default 10
 };
 
 const pool = new Pool(config);
 pool.connect();
 
-const getReviewsByProductId = (req, res) => {
-  let { product_id, sort, page = 1, count = 5 } = req.query;
+const isValid = (id) => {
+  return typeof id === 'string' && typeof parseInt(id) === 'number'
+}
 
-  let queryResult = {
-    product: String(product_id),
-    count,
-    page,
-  };
+const getReviewsByProductId = async (req, res) => {
+  try {
+    let { product_id, sort, page = 1, count = 5 } = req.query;
 
-  let query = `SELECT * from list l
-    WHERE l.product_id=${product_id} `;
-
-  if (sort) {
-    switch (sort) {
-      case 'newest':
-        query += 'ORDER BY date DESC ';
-        break;
-      case 'helpful':
-        query += 'ORDER BY helpfulness DESC ';
-        break;
-      case 'relevant':
-        query += 'ORDER BY helpfulness DESC, ';
-        query += 'date DESC ';
-        break;
+    if (!isValid(product_id)) {
+      throw 'Invalid product_id';
     }
+
+    let queryResult = {
+      product: String(product_id), // Front-end expects a string
+      count,
+      page,
+    };
+
+    let text = `SELECT * from list
+      WHERE list.product_id=$1 `;
+
+    const sortOptions = {
+      newest: 'ORDER BY date DESC ',
+      helpful: 'ORDER BY helpfulness DESC ',
+      relevant: 'ORDER BY helpfulness DESC, date DESC ',
+    };
+
+    if (sortOptions[sort]) {
+      text += sortOptions[sort];
+    }
+
+    text += ` OFFSET ${parseInt(page * count - count)}`;
+    text += ` LIMIT ${count};`;
+
+    let values = [product_id];
+    let query = { text, values };
+
+    pool.connect((err, client, release) => {
+      client.query(query, (err, results) => {
+        release();
+        if (err) {
+          throw 'Invalid query';
+        }
+        queryResult.results = results.rows || [];
+        res.status(200).send(queryResult);
+      });
+    });
+  } catch (err) {
+    res.status(400).send('Invalid product_id');
   }
-
-  query += ` OFFSET ${parseInt(page * count - count)}`;
-  query += ` LIMIT ${count};`;
-
-  console.log(query);
-  pool.query(query, (error, results) => {
-    if (error) {
-      return res.status(400).send('Invalid product_id');
-    }
-    queryResult.results = results.rows || [];
-    res.status(200).send(queryResult);
-  });
 };
 
 const postNewReview = (req, res) => {
-  let {
-    product_id,
-    rating,
-    date,
-    summary,
-    body,
-    recommend,
-    photos,
-    reviewer_name,
-    reviewer_email,
-    characteristics,
-  } = req.query;
+  try {
+    let {
+      product_id,
+      rating,
+      date,
+      summary,
+      body,
+      recommend,
+      photos,
+      reviewer_name,
+      reviewer_email,
+    } = req.query;
 
-  date = date || Date.now();
-  date = new Date(date).toISOString();
-  characteristics = characteristics || {};
-  photos = photos || [];
+    date = date || Date.now();
+    date = new Date(date).toISOString();
+    photos = photos || [];
 
-  let specs = [];
+    const $values = values.map((el, i) => (' $' + (i + 1))).join(); //$1,$2,$3...
 
-  for (var key in characteristics) {
-    specs.push(`(${characteristics}, ${characteristics[key]}) `);
+    let reviewText = `INSERT INTO list (
+      product_id,
+      rating,
+      date,
+      summary,
+      body,
+      recommend,
+      reviewer_name,
+      reviewer_email
+      )
+
+      VALUES  ( ${$values} ) ; `;
+
+    let reviewQuery = { text: reviewText, values };
+
+    pool.connect((err, client, results) => {
+      client.query(reviewQuery, (err, results) => {
+        if (err) {
+          throw 'We weren\'t able to post your review. Please be sure to complete all required (*) fields.';
+        }
+        res.status(201).send(results);
+      });
+    })
+  } catch (err) {
+    res.status(400).send(err);
   }
-
-  let $values = values.map((el, i) => (el = ' $' + (i + 1))).join(); //$1,$2,$3...
-  let $specs = specs.map((el, i) => (el = '$' + (i + 1))).join();
-
-  let reviewText = `INSERT INTO list (
-    product_id,
-    rating,
-    date,
-    summary,
-    body,
-    recommend,
-    reviewer_name,
-    reviewer_email
-    )
-
-    VALUES  ( ${$values} ) ; `;
-
-  let reviewQuery = { text: reviewText, values };
-
-  pool.query(reviewQuery, (error, results) => {
-    if (error) {
-      return res.status(400).send(error.stack);
-    }
-    res.status(201).send(results);
-  });
 };
 
 const getMetaByProductId = (req, res) => {
   let { product_id } = req.query;
+  console.log(req.query);
 
-  if (typeof product_id !== 'number' || parseInt(product_id) !== product_id) {
-    return res.status(400).send('Invalid product_id');
-  }
-
-  let query = {
-    text: 'SELECT * from meta_all WHERE product_id=$1;',
-    values: product_id
-  }
-
-  pool.query(query, (error, results) => {
-    if (error) {
-      return res.status(400).send(error.stack);
+  try {
+    if (!isValid(product_id)) {
+      throw 'Invalid product_id';
     }
-    res.status(200).send(results?.rows?.[0]);
-  });
+
+    let query = {
+      text: 'SELECT * from meta_all WHERE product_id=$1;',
+      values: [product_id],
+    };
+
+    pool.connect((err, client, release) => {
+      client.query(query, (err, results) => {
+        release();
+        if (err) {
+          throw 'Invalid query';
+        }
+        res.status(200).send(results.rows[0]);
+      });
+    });
+  } catch (err) {
+    res.status(400).send(err);
+  }
 };
 
 const markAsHelpful = (req, res) => {
-  let { review_id } = req.query;
+  console.log(req);
+  try {
+    let { review_id } = req.params;
 
-  let query = `UPDATE reviews.list
-    SET helpfulness = helpfulness + 1
-    WHERE (review_id=${review_id});`;
-  pool.query(query, (error, results) => {
-    if (error) {
-      return res.status(400).send('Invalid review_id');
+    if (!isValid(review_id)) {
+      throw 'Invalid review_id';
     }
-    res.status(204).send(results?.rows);
-  });
+
+    let text = `UPDATE reviews.list
+      SET helpfulness = helpfulness + 1
+      WHERE (review_id=$1);`;
+
+    let values = [ review_id ];
+    let query = { text, values };
+
+    pool.connect((err, client, release) => {
+      client.query(query, (err, results) => {
+        release();
+        if (err) {
+          throw `Could not update review ${review_id}`;
+        }
+        res.status(204).send(results.rows);
+      });
+    });
+  } catch (err) {
+    res.status(400).send(err);
+  }
 };
 
 const reportReview = (req, res) => {
-  let { review_id } = req.query;
+  try {
+    let { review_id } = req.params;
 
-  let query = `UPDATE reviews.list
-    SET reported = true
-    WHERE (review_id=${review_id});`;
-  console.log(query);
-  pool.query(query, (error, results) => {
-    if (error) {
-      return res.status(400).send('Invalid review_id');
+    if (!isValid(review_id)) {
+      throw 'Invalid review_id';
     }
-    res.status(204).send(results?.rows);
-  });
+
+    let text = `UPDATE reviews.list
+      SET reported = true
+      WHERE (review_id=$1);`;
+
+    let values = [ review_id ];
+    let query = { text, values };
+
+    pool.connect((err, client, release) => {
+      client.query(query, (err, results) => {
+        release();
+        if (err) {
+          throw `Could not update review ${review_id}`;
+        }
+        res.status(204).send(results.rows);
+      });
+    });
+  } catch (err) {
+    res.status(400).send(err);
+  }
+};
+
+const benchmark = (req, res) => {
+  try {
+    let query = 'SELECT NOW();';
+    pool.connect((err, client, release) => {
+      client.query(query, (err, results) => {
+        release();
+        if (err) {
+          throw err;
+        }
+        res.send(results.rows);
+      });
+    });
+  } catch (err) {
+    res.send(err);
+  }
 };
 
 module.exports = {
@@ -159,4 +223,5 @@ module.exports = {
   markAsHelpful,
   reportReview,
   postNewReview,
+  benchmark,
 };
