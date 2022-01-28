@@ -11,7 +11,6 @@ const config = {
 };
 
 const pool = new Pool(config);
-pool.connect();
 
 const isValid = (id) => {
   return typeof id === 'string' && typeof parseInt(id) === 'number'
@@ -26,7 +25,7 @@ const getReviewsByProductId = async (req, res) => {
     }
 
     let queryResult = {
-      product: String(product_id), // Front-end expects a string
+      product: String(product_id), // Front-end expects a string here
       count,
       page,
     };
@@ -60,6 +59,7 @@ const getReviewsByProductId = async (req, res) => {
         res.status(200).send(queryResult);
       });
     });
+
   } catch (err) {
     res.status(400).send('Invalid product_id');
   }
@@ -79,31 +79,53 @@ const postNewReview = (req, res) => {
       reviewer_email,
     } = req.query;
 
+    if (!isValid(product_id) || '') {
+      throw 'Invalid product_id';
+    }
+
     date = date || Date.now();
     date = new Date(date).toISOString();
     photos = photos || [];
 
-    const $values = values.map((el, i) => (' $' + (i + 1))).join(); //$1,$2,$3...
-
-    let reviewText = `INSERT INTO list (
+    let values = [
       product_id,
       rating,
       date,
       summary,
       body,
       recommend,
+      photos,
+      reviewer_name,
+      reviewer_email
+    ];
+
+    const $values = values.map((el, i) => {
+      if (el === undefined) {
+        throw 'We weren\'t able to post your review. Please be sure to complete all required (*) fields.';
+      }
+      return ' $' + (i + 1)
+    }).join(); // "$1,$2,$3,..."
+
+    let text = `INSERT INTO list (
+      product_id,
+      rating,
+      date,
+      summary,
+      body,
+      recommend,
+      photos,
       reviewer_name,
       reviewer_email
       )
 
       VALUES  ( ${$values} ) ; `;
 
-    let reviewQuery = { text: reviewText, values };
+    let query = { text, values };
 
     pool.connect((err, client, results) => {
-      client.query(reviewQuery, (err, results) => {
+      client.query(query, (err, results) => {
         if (err) {
-          throw 'We weren\'t able to post your review. Please be sure to complete all required (*) fields.';
+          throw 'An error occurred while posting a new review. Please check your entry and try again.';
         }
         res.status(201).send(results);
       });
@@ -115,7 +137,6 @@ const postNewReview = (req, res) => {
 
 const getMetaByProductId = (req, res) => {
   let { product_id } = req.query;
-  console.log(req.query);
 
   try {
     if (!isValid(product_id)) {
@@ -142,7 +163,6 @@ const getMetaByProductId = (req, res) => {
 };
 
 const markAsHelpful = (req, res) => {
-  console.log(req);
   try {
     let { review_id } = req.params;
 
@@ -150,7 +170,7 @@ const markAsHelpful = (req, res) => {
       throw 'Invalid review_id';
     }
 
-    let text = `UPDATE reviews.list
+    let text = `UPDATE list
       SET helpfulness = helpfulness + 1
       WHERE (review_id=$1);`;
 
@@ -161,9 +181,9 @@ const markAsHelpful = (req, res) => {
       client.query(query, (err, results) => {
         release();
         if (err) {
-          throw `Could not update review ${review_id}`;
+          throw 'Could not update review';
         }
-        res.status(204).send(results.rows);
+        res.status(204).send(results);
       });
     });
   } catch (err) {
@@ -179,7 +199,7 @@ const reportReview = (req, res) => {
       throw 'Invalid review_id';
     }
 
-    let text = `UPDATE reviews.list
+    let text = `UPDATE list
       SET reported = true
       WHERE (review_id=$1);`;
 
@@ -190,9 +210,9 @@ const reportReview = (req, res) => {
       client.query(query, (err, results) => {
         release();
         if (err) {
-          throw `Could not update review ${review_id}`;
+          throw 'Could not update review';
         }
-        res.status(204).send(results.rows);
+        res.status(204).send(results);
       });
     });
   } catch (err) {
