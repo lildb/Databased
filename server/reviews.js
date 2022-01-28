@@ -2,7 +2,7 @@ const express = require('express');
 const reviews = express.Router();
 const db = require('../db/');
 
-reviews.get('/benchmark', db.benchmark);
+reviews.get('/benchmark', db.benchmark); // Utility - returns the current time stamp if POSTGRESQL is connected
 
 reviews.get('/', db.getReviewsByProductId);
 reviews.get('/meta', db.getMetaByProductId);

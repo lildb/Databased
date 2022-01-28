@@ -1,11 +1,12 @@
 {
   "name": "databased",
   "version": "1.0.0",
-  "description": "Hack Reactor System Design Capstone - Atelier Reviews API",
+  "description": "Atelier Reviews API",
   "main": "./server/index.js",
   "scripts": {
-    "start": "nodemon ./server/index.js && sudo iptables -t nat -A PREROUTING -i eth0 -p tcp --dport 80 -j REDIRECT --to-port process.env.PORT",
-    "test": "jest --no-cache"
+    "start": "nodemon ./server/index.js --trace-uncaught",
+    "test": "jest --no-cache",
+    "production": "npm start && iptables -t nat -A PREROUTING -i eth0 -p tcp --dport 80 -j REDIRECT --to-port process.env.PORT"
   },
   "repository": {
     "type": "git",
@@ -18,15 +19,15 @@
   },
   "homepage": "https://github.com/lildb/Databased#readme",
   "dependencies": {
+    "concurrently": "^7.0.0",
     "dotenv": "^10.0.0",
-    "eslint": "^8.2.0",
     "express": "^4.17.1",
-    "k6": "^0.0.0",
-    "mongoose": "^6.0.13",
     "nodemon": "^2.0.15",
     "pg": "^8.7.1"
   },
   "devDependencies": {
-    "jest": "^27.3.1"
+    "eslint": "^8.2.0",
+    "jest": "^27.3.1",
+    "k6": "^0.0.0"
   }
 }

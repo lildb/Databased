@@ -61,7 +61,7 @@ const getReviewsByProductId = async (req, res) => {
     });
 
   } catch (err) {
-    res.status(400).send('Invalid product_id');
+    res.status(400).send(err);
   }
 };
 
@@ -79,7 +79,7 @@ const postNewReview = (req, res) => {
       reviewer_email,
     } = req.query;
 
-    if (!isValid(product_id) || '') {
+    if (!isValid(product_id)) {
       throw 'Invalid product_id';
     }
 
@@ -99,7 +99,7 @@ const postNewReview = (req, res) => {
       reviewer_email
     ];
 
-    const $values = values.map((el, i) => {
+    const $VALUES = values.map((el, i) => {
       if (el === undefined) {
         throw 'We weren\'t able to post your review. Please be sure to complete all required (*) fields.';
       }
@@ -118,7 +118,7 @@ const postNewReview = (req, res) => {
       reviewer_email
       )
 
-      VALUES  ( ${$values} ) ; `;
+      VALUES  ( ${$VALUES} ) ; `;
 
     let query = { text, values };
 

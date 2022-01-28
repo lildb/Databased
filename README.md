@@ -1,4 +1,4 @@
-# **REST API** Docs
+# **REST API** Usage and Deployment Guide
 
 A redesigned and scalable Rest API using:
 
@@ -175,18 +175,16 @@ Basic SQL commands in PostgreSQL to get you started:
 - Press `q` to close a command menu if the terminal displays a `:` or `(END)`
 
 
-### 5. Run the .SQL script to load the csv files into the database
+### 5. Run the .SQL script to load `csv` files into the database
 - From the terminal of your *PostgreSQL* server, run:
 
 ```shell
 psql postgres -f ./pg_reviews_etl.sql
 ```
 
-- Transferring from .CSV files to a temporary table first is significantly faster than transforming the data while simultaneously loading it into the database.
-- If all goes well, you should see something like the following:
+- Transferring from .CSV files to a temporary table first, as type `TEXT`, is significantly faster, but does require more RAM. Once the file(s) are loaded into PostgreSQL, they are parsed with data type constraints and foreign keys and indexes are added. The temporary tables are dropped to free up memory space before proceeding to the next file.
 
-
-- I used SCP to send .CSV files to my virtual machine instance. This API is designed to be scale-agnostic and will work with any cloud service running Ubuntu Server 20.04.
+- I used SCP to send .CSV files to my virtual machine instance. I deployed on `AWS EC2` [t2.micro](https://aws.amazon.com/ec2/instance-types/t2/) This API is designed to be scale-agnostic and will work with any cloud service running Ubuntu Server 20.04.
 
 ### 6. Set up the .env file to use with the Express application server instances. The variables should correspond with the *PostgreSQL* config settings
 
@@ -194,17 +192,13 @@ psql postgres -f ./pg_reviews_etl.sql
 install node, etc...
 
 ### 7. Start the Express Server
-- `npm start`
+- `npm start` Runs the *Express* app server using [**nodemon**](https://nodemon.io/)
 
 ### 8. Install *PM2* to daemonize the server process. I'd suggest using a startup script, and configuring to reload if it crashes
 
 ### 9. Test your server with K6 (locally) or [loader.io].
 
 ### 10. To increase throughput and decrease load on any one particular app server, install NGINX as a web server in front of your app server instances.
-
- // TODO config NGINX ....
-  // load balancing algos
-  // caching
 
 
 ## Load Balancer
@@ -323,7 +317,7 @@ Returns metadata for a current project
   POST /reviews
 ```
 
-##### Inserts a new review into the database. 
+##### Inserts a new review into the database.
 
 #### Photos **must** be an array of objects, formatted as such:
 
