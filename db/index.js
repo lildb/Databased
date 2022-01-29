@@ -6,7 +6,7 @@ const config = {
   host: process.env.PGHOST,
   port: process.env.PGPORT,
   password: process.env.PGPASSWORD,
-  rowMode: 'array', // Specify return format of query results
+  rowMode: 'array',
   max: 20, // Maximum pool connections - OPTIONAL - Default 10
 };
 
